@@ -30,6 +30,9 @@ namespace ClientDecisionService
         [DllImport(LIBVW, EntryPoint = "VW_FinishExample")]
         public static extern void FinishExample(VwHandle vw, VwExample example);
 
+        [DllImport(LIBVW, EntryPoint = "VW_GetScores")]
+        public static extern void GetScores(VwExample example, float[] scores, int length);
+
         [DllImport(LIBVW, EntryPoint = "VW_GetCostSensitivePrediction")]
         public static extern float GetCostSensitivePrediction(VwExample example);
 

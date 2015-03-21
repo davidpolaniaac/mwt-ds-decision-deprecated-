@@ -6,17 +6,20 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading;
 
 namespace ClientDecisionService
 {
-    internal class DecisionServicePolicy<TContext> : IPolicy<TContext>, IDisposable
+    internal class DecisionServicePolicy<TContext> : IPolicy<TContext>, IScorer<TContext>, IDisposable
     {
-        public DecisionServicePolicy(Action notifyPolicyUpdate, string modelAddress, string modelOutputDir)
+        public DecisionServicePolicy(Action notifyPolicyUpdate, string modelAddress, int numberOfActions, string modelOutputDir)
         {
             this.notifyPolicyUpdate = notifyPolicyUpdate;
             this.modelAddress = modelAddress;
+            this.numberOfActions = numberOfActions;
             this.modelOutputDir = string.IsNullOrWhiteSpace(modelOutputDir) ? string.Empty : modelOutputDir;
 
             this.cancellationToken = new CancellationTokenSource();
@@ -27,6 +30,34 @@ namespace ClientDecisionService
             this.worker.DoWork += PollForUpdate;
             this.worker.ProgressChanged += FoundUpdate;
             this.worker.RunWorkerAsync(this.cancellationToken);
+        }
+
+        public List<float> ScoreActions(TContext context)
+        {
+            StringBuilder lineBuilder = new StringBuilder();
+            for (int i = 0; i < numberOfActions; i++)
+            {
+                lineBuilder.Append(string.Format(CultureInfo.InvariantCulture, "{0}: ", i + 1));
+            }
+            lineBuilder.Append(string.Format(CultureInfo.InvariantCulture, "| {0}", context));
+            
+            string exampleLine = lineBuilder.ToString();
+
+            lock (this.vwLock)
+            {
+                IntPtr example = VowpalWabbitInterface.ReadExample(vw, exampleLine);
+                VowpalWabbitInterface.Predict(vw, example);
+                VowpalWabbitInterface.FinishExample(vw, example);
+
+                var scores = new float[numberOfActions];
+                VowpalWabbitInterface.GetScores(example, scores, scores.Length);
+                for (int i = 0; i < numberOfActions; i++)
+                {
+                    scores[i] = -scores[i];
+                }
+
+                return scores.ToList();
+            }
         }
 
         public uint ChooseAction(TContext context)
@@ -228,6 +259,7 @@ namespace ClientDecisionService
 
         readonly Action notifyPolicyUpdate;
         readonly string modelAddress;
+        readonly int numberOfActions;
         readonly string modelOutputDir;
         DateTimeOffset modelDate;
 

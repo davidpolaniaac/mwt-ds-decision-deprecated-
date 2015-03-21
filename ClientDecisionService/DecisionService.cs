@@ -20,7 +20,8 @@ namespace ClientDecisionService
 
             // COMMENT: I'd leave the model address in the string to improve readability
             policy = new DecisionServicePolicy<TContext>(UpdatePolicy, 
-                string.Format(CultureInfo.InvariantCulture, ModelAddress, config.AuthorizationToken, config.UseLatestPolicy), 
+                string.Format(CultureInfo.InvariantCulture, ModelAddress, config.AuthorizationToken, config.UseLatestPolicy),
+                53, // TODO: remove hardcoded number of actions = 53
                 config.PolicyModelOutputDir);
 
             mwt = new MwtExplorer<TContext>(config.AppId, recorder);
@@ -69,9 +70,11 @@ namespace ClientDecisionService
                 consumePolicy.UpdatePolicy(policy);
                 Trace.TraceInformation("Model update succeeded.");
             }
-            else
+            IConsumeScorer<TContext> consumeScorer = explorer as IConsumeScorer<TContext>;
+            if (consumeScorer != null)
             {
-                throw new NotSupportedException("This type of explorer does not currently support updating policy functions.");
+                consumeScorer.UpdateScorer(policy);
+                Trace.TraceInformation("Model update succeeded.");
             }
         }
 
