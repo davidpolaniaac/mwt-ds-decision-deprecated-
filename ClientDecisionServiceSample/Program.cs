@@ -227,7 +227,7 @@ namespace ClientDecisionServiceSample
 
             var serviceConfig = new DecisionServiceConfiguration<UserContext>(
                 //authorizationToken: "c01ff675-5710-4814-a961-d03d2d6bce65",
-                authorizationToken: "10198550-a074-4f9c-8b15-cc389bc2bbbe",
+                authorizationToken: "3c71bfd7-bc25-47cd-beb0-c773813cca28",
                 explorer: new EpsilonGreedyExplorer<UserContext>(new UserPolicy(), epsilon: 0.2f, numActions: 2))
             {
                 BatchConfig = new BatchingConfiguration()
@@ -238,7 +238,8 @@ namespace ClientDecisionServiceSample
                     MaxUploadQueueCapacity = 1024 * 32
                 },
                 // Features must be top-level, no nesting supported
-                ContextJsonSerializer = uc => JsonConvert.SerializeObject(uc.FeatureVector)
+                ContextJsonSerializer = uc => JsonConvert.SerializeObject(uc.FeatureVector),
+                LoggingServiceAddress = "http://decisionservice-demo.cloudapp.net"
             };
 
             var service = new DecisionService<UserContext>(serviceConfig);
