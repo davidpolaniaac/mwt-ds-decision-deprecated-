@@ -69,17 +69,17 @@ namespace ClientDecisionServiceSample
         private static void RetrainModel(string token, int numberOfActions)
         {
             // Int 
-            string apiKey = "TmGRqNMWIZd9b9dDvXSF8AtK5t1NjCnxVB5Jm4QWH+AmAZf8YBFVMPrc3w+yqtW9hFf/hK6RhtdkfrRrCkmh5Q==";
-            string baseAddress = "https://ussouthcentral.services.azureml-int.net/";
-            string postAddress = "workspaces/6c6831ae655346a5be7cc6c9bb9dfefc/services/a2d00c3ceb2e414785ce707483327d54/jobs";
-            string statusAddress = "workspaces/6c6831ae655346a5be7cc6c9bb9dfefc/services/a2d00c3ceb2e414785ce707483327d54/jobs/{0}?api-version=2.0";
+            //string apiKey = "TmGRqNMWIZd9b9dDvXSF8AtK5t1NjCnxVB5Jm4QWH+AmAZf8YBFVMPrc3w+yqtW9hFf/hK6RhtdkfrRrCkmh5Q==";
+            //string baseAddress = "https://ussouthcentral.services.azureml-int.net/";
+            //string postAddress = "workspaces/6c6831ae655346a5be7cc6c9bb9dfefc/services/a2d00c3ceb2e414785ce707483327d54/jobs";
+            //string statusAddress = "workspaces/6c6831ae655346a5be7cc6c9bb9dfefc/services/a2d00c3ceb2e414785ce707483327d54/jobs/{0}?api-version=2.0";
 
             // Afxcurrent
-            //string apiKey = "RCqaC3h/dKl9iAn75wefSSDeY67H2y3raHnRfvKOxWCKyYdOceBkVN/mfEn5f9yY0StliDYSifDO2MtTdkpUHw==";
-            //string baseAddress = "https://afxcurrentrrs.cloudapp.net/";
-            //string postAddress = "workspaces/2f3007c334664c069b1d1841166dc2d6/services/bdb537033b5d44869909c8e14e7fa9b4/jobs";
-            //string statusAddress = "workspaces/2f3007c334664c069b1d1841166dc2d6/services/bdb537033b5d44869909c8e14e7fa9b4/jobs/{0}?api-version=2.0";
-            //ServicePointManager.ServerCertificateValidationCallback += (a, b, c, d) => true;
+            string apiKey = "oWPubdX7CEadQEWcJBzxLefjj02aHqu0/W1bGAersehSYisPfDmvSjzhdmviyPSzcULQlEbdcx4m65RUONZFSA==";
+            string baseAddress = "https://afxcurrentrrs.cloudapp.net/";
+            string postAddress = "workspaces/2f3007c334664c069b1d1841166dc2d6/services/29d71a74c7264c95bbc0d129c876f103/jobs/job_id/start?api-version=2.0";
+            string statusAddress = "workspaces/2f3007c334664c069b1d1841166dc2d6/services/29d71a74c7264c95bbc0d129c876f103/jobs/job_id?api-version=2.0";
+            System.Net.ServicePointManager.ServerCertificateValidationCallback += (a, b, c, d) => true;
 
             string jobId = string.Empty;
             using (var client = new HttpClient())
@@ -92,7 +92,6 @@ namespace ClientDecisionServiceSample
                 {
                     var besInput = new AzureMLBESInputType
                     {
-                        Input = null,
                         //Input = new AzureMLBESInputType.InputType
                         //{
                         //    ConnectionString = "DefaultEndpointsProtocol=https;AccountName=louiemartstorage;AccountKey=NQ7fHHuwvSnTERMNLAxGoz0Nf9LzV7Jl7651KhA1T3AB/i+/wTArWbV1TKowflIMEca6A53JkcwRsrind8P6+g==",
@@ -100,18 +99,19 @@ namespace ClientDecisionServiceSample
                         //    SasBlobToken = null,
                         //    BaseLocation = null,
                         //},
-                        Output = null,
                         GlobalParameters = new AzureMLBESInputType.GlobalParametersType
                         {
                             ReaderToken = token,
                             Token = token,
-                            NumberOfActions = numberOfActions
+                            NumberOfActions = numberOfActions,
+                            NumberOfActions1 = numberOfActions
                         }
                     };
 
+                    string jsonString = JsonConvert.SerializeObject(besInput);
                     Task<HttpResponseMessage> responseTask = client.PostAsync(
                         postAddress,
-                        new StringContent(JsonConvert.SerializeObject(besInput), Encoding.UTF8, "application/json")
+                        new StringContent(jsonString, Encoding.UTF8, "application/json")
                     );
                     responseTask.Wait();
 
@@ -377,8 +377,6 @@ namespace ClientDecisionServiceSample
 
     public class AzureMLBESInputType
     {
-        public InputType Input { get; set; }
-        public string Output { get; set; }
         public GlobalParametersType GlobalParameters { get; set; }
 
         public class InputType
@@ -399,6 +397,9 @@ namespace ClientDecisionServiceSample
 
             [JsonProperty(PropertyName = "Number of actions")]
             public int NumberOfActions { get; set; }
+
+            [JsonProperty(PropertyName = "Number of actions1")]
+            public int NumberOfActions1 { get; set; }
         }
     }
 }
