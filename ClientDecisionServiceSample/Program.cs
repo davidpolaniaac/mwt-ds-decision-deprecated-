@@ -37,6 +37,7 @@ namespace ClientDecisionServiceSample
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=decisionservice;AccountKey=hAv42cl/DlFLwd+N23/wNQKub/nVSEYyO6zjlksgMFC9/HVhQMHpNVhdaZGTD1PT0W7lqfKbf9LVt2/z2K3Quw==");
 
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+
             var containers = blobClient.ListContainers("testcomplete");
 
             var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount * 2 };
@@ -345,7 +346,11 @@ namespace ClientDecisionServiceSample
             FeatureVector = features;
         }
 
+        [AsReference]
         public IDictionary<string, float> FeatureVector { get; set; }
+
+        [AsReference]
+        public string OtherStuff { get; set; }
     }
 
     class MyOutcome { }

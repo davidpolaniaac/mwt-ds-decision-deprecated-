@@ -16,6 +16,9 @@ using System.Threading.Tasks;
 
 namespace ClientDecisionService
 {
+
+    public class AsReferenceAttribute : Attribute { }
+
     /// <summary>
     /// Encapsulates logic for recorder with async server communications & policy update.
     /// </summary>

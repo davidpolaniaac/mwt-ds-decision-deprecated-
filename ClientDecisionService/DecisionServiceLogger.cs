@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Diagnostics;
 using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
+using System.Reflection;
 
 namespace ClientDecisionService
 {
@@ -61,19 +62,50 @@ namespace ClientDecisionService
                 .Select(w => w.Buffer(this.batchConfig.MaxEventCount, this.batchConfig.MaxBufferSizeInBytes, json => Encoding.UTF8.GetByteCount(json)))
                 .SelectMany(buffer => buffer)
                 .Subscribe(this.eventProcessor.AsObserver());
+
+            this.asReferenceProperties =
+            (
+                from propInfo in typeof(TContext).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                from arAttribute in propInfo.GetCustomAttributes<AsReferenceAttribute>()
+                select propInfo
+            ).ToList();
+
+            this.featureCache = new HashSet<object>();
         }
 
         // TODO: add a TryRecord that doesn't block and returns whether the operation was successful
         // TODO: alternatively we could also use a Configuration setting to control how Record() behaves
         public void Record(TContext context, uint action, float probability, string uniqueKey)
         {
+            // Manually serialize features using compression scheme
+            // Alternatively we could instantiate a new Context type with the proper Json.Net annotation and values
+            var serializedCompressedContext = new StringBuilder();
+            foreach (PropertyInfo prop in this.asReferenceProperties)
+            {
+                object featureValue = prop.GetValue(context);
+
+                // For correctness use hash code if necessary
+                //int featureHash = featureValue.GetHashCode();
+                //if (this.featureCache.Contains(featureHash))
+
+                // Otherwise check the actual object
+                if (this.featureCache.Contains(featureValue))
+                {
+                    //serializedCompressedContext.Append(reference);
+                }
+                else
+                {
+                    //serializedCompressedContext.Append(value);
+                }
+            }
+
             // Blocking call if queue is full.
             this.eventObserver.OnNext(new Interaction
             { 
                 ID = uniqueKey,
                 Action = (int)action,
                 Probability = probability,
-                Context = this.contextSerializer(context)
+                Context = serializedCompressedContext.ToString()
             });
         }
 
@@ -199,6 +231,9 @@ namespace ClientDecisionService
         private readonly string loggingServiceBaseAddress;
         private IDisposable eventUnsubscriber;
         private HttpClient httpClient;
+
+        private HashSet<object> featureCache;
+        private List<PropertyInfo> asReferenceProperties;
         #endregion
     }
 }
