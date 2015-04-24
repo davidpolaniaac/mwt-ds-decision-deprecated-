@@ -5,6 +5,7 @@ using Microsoft.WindowsAzure.Storage.Blob;
 using MultiWorldTesting;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -16,8 +17,28 @@ using System.Threading.Tasks;
 
 namespace ClientDecisionService
 {
+    public interface IFeatureHasher
+    {
+        int ComputeHash(object obj);
+    }
 
-    public class AsReferenceAttribute : Attribute { }
+    public class AsReferenceAttribute : Attribute 
+    {
+        public Type Hasher { get; set; }
+    }
+
+    public class ReferenceEqualityComparer : IEqualityComparer<object>
+    {
+        public bool Equals(object x, object y)
+        {
+            return object.ReferenceEquals(x, y);
+        }
+
+        public int GetHashCode(object obj)
+        {
+            return obj.GetHashCode();
+        }
+    }
 
     /// <summary>
     /// Encapsulates logic for recorder with async server communications & policy update.

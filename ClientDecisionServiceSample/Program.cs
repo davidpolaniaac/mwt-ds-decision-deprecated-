@@ -336,9 +336,17 @@ namespace ClientDecisionServiceSample
         internal int TrueAction { get; set; }
     }
 
+    public class MyHasher : IFeatureHasher
+    {
+        public int ComputeHash(object obj)
+        {
+            // compute custom hash code
+            return 0;
+        }
+    }
+
     class UserContext
     {
-
         public UserContext() : this(null) { }
 
         public UserContext(IDictionary<string, float> features)
@@ -346,10 +354,10 @@ namespace ClientDecisionServiceSample
             FeatureVector = features;
         }
 
-        [AsReference]
+        [AsReference(Hasher = typeof(MyHasher))]
         public IDictionary<string, float> FeatureVector { get; set; }
 
-        [AsReference]
+        [AsReference(Hasher = typeof(MyHasher))]
         public string OtherStuff { get; set; }
     }
 

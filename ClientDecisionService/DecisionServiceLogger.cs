@@ -67,10 +67,11 @@ namespace ClientDecisionService
             (
                 from propInfo in typeof(TContext).GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 from arAttribute in propInfo.GetCustomAttributes<AsReferenceAttribute>()
-                select propInfo
+                select new ContextProperties { PropInfo = propInfo, PropAttribute = arAttribute }
             ).ToList();
 
-            this.featureCache = new HashSet<object>();
+            // Compare using reference equality
+            this.featureCache = new HashSet<object>(new ReferenceEqualityComparer());
         }
 
         // TODO: add a TryRecord that doesn't block and returns whether the operation was successful
@@ -80,12 +81,14 @@ namespace ClientDecisionService
             // Manually serialize features using compression scheme
             // Alternatively we could instantiate a new Context type with the proper Json.Net annotation and values
             var serializedCompressedContext = new StringBuilder();
-            foreach (PropertyInfo prop in this.asReferenceProperties)
+            foreach (ContextProperties prop in this.asReferenceProperties)
             {
-                object featureValue = prop.GetValue(context);
+                object featureValue = prop.PropInfo.GetValue(context);
+
+                var hasher = Activator.CreateInstance(prop.PropAttribute.Hasher) as IFeatureHasher;
 
                 // For correctness use hash code if necessary
-                //int featureHash = featureValue.GetHashCode();
+                //int featureHash = hasher.ComputeHash(featureValue);
                 //if (this.featureCache.Contains(featureHash))
 
                 // Otherwise check the actual object
@@ -233,7 +236,13 @@ namespace ClientDecisionService
         private HttpClient httpClient;
 
         private HashSet<object> featureCache;
-        private List<PropertyInfo> asReferenceProperties;
+        private List<ContextProperties> asReferenceProperties;
         #endregion
+    }
+
+    public class ContextProperties
+    {
+        public PropertyInfo PropInfo { get; set; }
+        public AsReferenceAttribute PropAttribute { get; set; }
     }
 }
