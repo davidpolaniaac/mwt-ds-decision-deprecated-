@@ -53,7 +53,7 @@ public:
 	/// </summary>
 	/// <param name="context">A user-defined context for the decision.</param>
 	/// <returns>Index of the action to take (1-based)</returns>
-	virtual UInt32 ChooseAction(Ctx context) = 0;
+    virtual UInt32 ChooseAction(Ctx context, UInt32 numActions) = 0;
 };
 
 /// <summary>
@@ -69,7 +69,7 @@ public:
 	/// </summary>
 	/// <param name="context">A user-defined context for the decision.</param>
 	/// <returns>Vector of scores indexed by action (1-based).</returns>
-	virtual List<float>^ ScoreActions(Ctx context) = 0;
+    virtual List<float>^ ScoreActions(Ctx context, UInt32 numActions) = 0;
 };
 
 generic <class Ctx>

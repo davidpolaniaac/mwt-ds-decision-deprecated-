@@ -39,17 +39,16 @@ namespace ClientDecisionServiceWebSample.Controllers
             });
 
             HostingEnvironment.QueueBackgroundWorkItem(cancelToken => {
-                DecisionServiceWrapper<string>.Create(
+                DecisionServiceWrapper<SampleContext>.Create(
                     appToken: appToken, 
-                    epsilon: .2f, 
-                    numActions: 10,
+                    epsilon: .2f,
                     modelOutputDir: outputDir);
 
-                string context = "context " + requestCount;
+                var context = new SampleContext { Data = "context " + requestCount };
                 string outcome = "outcome " + requestCount;
 
-                uint action = DecisionServiceWrapper<string>.Service.ChooseAction(requestCount.ToString(), context);
-                DecisionServiceWrapper<string>.Service.ReportOutcome(outcome, requestCount.ToString());
+                uint action = DecisionServiceWrapper<SampleContext>.Service.ChooseAction(requestCount.ToString(), context, numActions: 10);
+                DecisionServiceWrapper<SampleContext>.Service.ReportOutcome(outcome, requestCount.ToString());
 
                 System.IO.File.AppendAllLines(exploreFile, new string[] { "Action: " + action.ToString() });
             });

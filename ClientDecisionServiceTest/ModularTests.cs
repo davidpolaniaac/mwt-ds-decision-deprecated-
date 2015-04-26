@@ -21,7 +21,7 @@ namespace ClientDecisionServiceTest
         {
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: "my token",
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: 2));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f));
 
             dsConfig.OfflineMode = true;
 
@@ -40,7 +40,7 @@ namespace ClientDecisionServiceTest
         {
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: "my token",
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f));
 
             dsConfig.OfflineMode = true;
             dsConfig.Logger = new TestLogger();
@@ -49,7 +49,7 @@ namespace ClientDecisionServiceTest
             var ds = new DecisionService<TestContext>(dsConfig); 
             for (int i = 0; i < numChooseAction; i++)
             {
-                ds.ChooseAction(i.ToString(), new TestContext());
+                ds.ChooseAction(i.ToString(), new TestContext(), numActions: Constants.NumberOfActions);
             }
 
             Assert.AreEqual(numChooseAction, ((TestLogger)dsConfig.Logger).NumRecord);
@@ -82,7 +82,7 @@ namespace ClientDecisionServiceTest
         {
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: this.authToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f));
 
             dsConfig.CommandCenterAddress = this.commandCenterAddress;
             dsConfig.Logger = new TestLogger();
@@ -91,7 +91,7 @@ namespace ClientDecisionServiceTest
             var ds = new DecisionService<TestContext>(dsConfig);
             for (int i = 0; i < numChooseAction; i++)
             {
-                ds.ChooseAction(i.ToString(), new TestContext());
+                ds.ChooseAction(i.ToString(), new TestContext(), numActions: Constants.NumberOfActions);
             }
 
             Assert.AreEqual(numChooseAction, ((TestLogger)dsConfig.Logger).NumRecord);
@@ -124,7 +124,7 @@ namespace ClientDecisionServiceTest
         {
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: this.authToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f));
 
             HttpStatusCode exceptionCode = HttpStatusCode.OK;
             try

@@ -6,13 +6,34 @@ using System.Collections.Generic;
 
 namespace ClientDecisionServiceTest
 {
-    class TestContext { }
+    class TestContext : IContext
+    {
+        public object GetGlobalFeatures()
+        {
+            return null;
+        }
+
+        public object GetActionFeatures(uint action)
+        {
+            return null;
+        }
+
+        public int GetNumberOfActions()
+        {
+            return 0;
+        }
+
+        public string ToVWString()
+        {
+            return string.Empty;
+        }
+    }
 
     class TestOutcome { }
 
     class TestPolicy : IPolicy<TestContext>
     {
-        public uint ChooseAction(TestContext context)
+        public uint ChooseAction(TestContext context, uint numActions)
         {
             // Always returns the same action regardless of context
             return Constants.NumberOfActions - 1;

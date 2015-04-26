@@ -8,6 +8,7 @@ namespace ClientDecisionService
     /// Configuration object for the client decision service which contains settings for batching, retry storage, etc...
     /// </summary>
     public class DecisionServiceConfiguration<TContext>
+        where TContext : IContext
     {
         public DecisionServiceConfiguration(string authorizationToken, IExplorer<TContext> explorer)
         {

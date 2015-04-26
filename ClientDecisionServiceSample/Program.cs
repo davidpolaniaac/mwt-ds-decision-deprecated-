@@ -166,7 +166,7 @@ namespace ClientDecisionServiceSample
             // Create configuration for the decision service
             var serviceConfig = new DecisionServiceConfiguration<UserContext>(
                 authorizationToken: "",
-                explorer: new EpsilonGreedyExplorer<UserContext>(new UserPolicy(), epsilon: 0.2f, numActions: 10))
+                explorer: new EpsilonGreedyExplorer<UserContext>(new UserPolicy(), epsilon: 0.2f))
             //explorer = new TauFirstExplorer<MyContext>(new UserPolicy(), tau: 50, numActions: 10))
             //explorer = new BootstrapExplorer<MyContext>(new IPolicy<MyContext>[2] { new UserPolicy(), new UserPolicy() }, numActions: 10))
             //explorer = new SoftmaxExplorer<MyContext>(new UserScorer(), lambda: 0.5f, numActions: 10))
@@ -189,7 +189,7 @@ namespace ClientDecisionServiceSample
             var service = new DecisionService<UserContext>(serviceConfig);
 
             string uniqueKey = "eventid";
-            uint action = service.ChooseAction(uniqueKey, new UserContext());
+            uint action = service.ChooseAction(uniqueKey, new UserContext(), numActions: 10);
 
             // Report outcome as a JSON
             service.ReportOutcome("my json outcome", uniqueKey);
@@ -229,7 +229,7 @@ namespace ClientDecisionServiceSample
             var serviceConfig = new DecisionServiceConfiguration<UserContext>(
                 //authorizationToken: "c01ff675-5710-4814-a961-d03d2d6bce65",
                 authorizationToken: "10198550-a074-4f9c-8b15-cc389bc2bbbe",
-                explorer: new EpsilonGreedyExplorer<UserContext>(new UserPolicy(), epsilon: 0.2f, numActions: 2))
+                explorer: new EpsilonGreedyExplorer<UserContext>(new UserPolicy(), epsilon: 0.2f))
             {
                 BatchConfig = new BatchingConfiguration()
                 {
@@ -287,7 +287,7 @@ namespace ClientDecisionServiceSample
 
             var actionBlock = new ActionBlock<Parsed>(p =>
             {
-                uint action = service.ChooseAction(p.UniqueId.ToString(), p.Context);
+                uint action = service.ChooseAction(p.UniqueId.ToString(), p.Context, numActions: 2);
                 service.ReportReward(-Math.Abs((int)action - p.TrueAction), p.UniqueId.ToString());
             });
 
@@ -345,7 +345,7 @@ namespace ClientDecisionServiceSample
         }
     }
 
-    class UserContext
+    class UserContext : IContext
     {
         public UserContext() : this(null) { }
 
@@ -359,6 +359,26 @@ namespace ClientDecisionServiceSample
 
         [AsReference(Hasher = typeof(MyHasher))]
         public string OtherStuff { get; set; }
+
+        public object GetGlobalFeatures()
+        {
+            return FeatureVector;
+        }
+
+        public object GetActionFeatures(uint action)
+        {
+            return null;
+        }
+
+        public int GetNumberOfActions()
+        {
+            return 0;
+        }
+
+        public string ToVWString()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     class MyOutcome { }
@@ -373,7 +393,7 @@ namespace ClientDecisionServiceSample
 
     class UserPolicy : IPolicy<UserContext>
     {
-        public uint ChooseAction(UserContext context)
+        public uint ChooseAction(UserContext context, uint numActions)
         {
             return (uint)1; //((context.FeatureVector.Length % 2) + 1);
         }
@@ -381,7 +401,7 @@ namespace ClientDecisionServiceSample
 
     class UserScorer : IScorer<UserContext>
     {
-        public List<float> ScoreActions(UserContext context)
+        public List<float> ScoreActions(UserContext context, uint numActions)
         {
             return new List<float>();
         }

@@ -17,12 +17,12 @@ using namespace msclr::interop;
 namespace MultiWorldTesting {
 
 // Policy callback
-private delegate UInt32 ClrPolicyCallback(IntPtr explorerPtr, IntPtr contextPtr, int index);
-typedef u32 Native_Policy_Callback(void* explorer, void* context, int index);
+    private delegate UInt32 ClrPolicyCallback(IntPtr explorerPtr, IntPtr contextPtr, UInt32 numActions, int index);
+typedef u32 Native_Policy_Callback(void* explorer, void* context, u32 num_actions, int index);
 
 // Scorer callback
-private delegate void ClrScorerCallback(IntPtr explorerPtr, IntPtr contextPtr, IntPtr scores, IntPtr size);
-typedef void Native_Scorer_Callback(void* explorer, void* context, float* scores[], u32* size);
+private delegate void ClrScorerCallback(IntPtr explorerPtr, IntPtr contextPtr, UInt32 numActions, IntPtr scores, IntPtr size);
+typedef void Native_Scorer_Callback(void* explorer, void* context, u32 num_actions, float* scores[], u32* size);
 
 // Recorder callback
 private delegate void ClrRecorderCallback(IntPtr mwtPtr, IntPtr contextPtr, UInt32 action, float probability, IntPtr uniqueKey);
@@ -117,9 +117,9 @@ public:
 		m_index = index;
 	}
 
-	u32 Choose_Action(NativeContext& context)
+    u32 Choose_Action(NativeContext& context, u32 num_actions)
 	{
-		return m_func(context.Get_Clr_Explorer(), context.Get_Clr_Context(), m_index);
+		return m_func(context.Get_Clr_Explorer(), context.Get_Clr_Context(), num_actions, m_index);
 	}
 
 private:
@@ -135,11 +135,11 @@ public:
 		m_func = func;
 	}
 
-	vector<float> Score_Actions(NativeContext& context)
+    vector<float> Score_Actions(NativeContext& context, u32 num_actions)
 	{
 		float* scores = nullptr;
 		u32 num_scores = 0;
-		m_func(context.Get_Clr_Explorer(), context.Get_Clr_Context(), &scores, &num_scores);
+        m_func(context.Get_Clr_Explorer(), context.Get_Clr_Context(), num_actions, &scores, &num_scores);
 
 		// It's ok if scores is null, vector will be empty
 		vector<float> scores_vector(scores, scores + num_scores);
@@ -156,7 +156,7 @@ generic <class Ctx>
 public ref class PolicyCallback abstract
 {
 internal:
-	virtual UInt32 InvokePolicyCallback(Ctx context, int index) = 0;
+    virtual UInt32 InvokePolicyCallback(Ctx context, UInt32 numActions, int index) = 0;
 
 	PolicyCallback()
 	{
@@ -182,21 +182,21 @@ internal:
 		return m_native_policy;
 	}
   
-  vector<unique_ptr<NativeMultiWorldTesting::IPolicy<NativeContext>>>* GetNativePolicies(int count)
+    vector<unique_ptr<NativeMultiWorldTesting::IPolicy<NativeContext>>>* GetNativePolicies(int count)
 	{
 		if (m_native_policies == nullptr)
 		{
-      m_native_policies = new vector<unique_ptr<NativeMultiWorldTesting::IPolicy<NativeContext>>>();
+            m_native_policies = new vector<unique_ptr<NativeMultiWorldTesting::IPolicy<NativeContext>>>();
 			for (int i = 0; i < count; i++)
 			{
-        m_native_policies->push_back(unique_ptr<NativeMultiWorldTesting::IPolicy<NativeContext>>(new NativePolicy(m_callback, i)));
+                m_native_policies->push_back(unique_ptr<NativeMultiWorldTesting::IPolicy<NativeContext>>(new NativePolicy(m_callback, i)));
 			}
 		}
 
 		return m_native_policies;
 	}
 
-	static UInt32 InteropInvoke(IntPtr callbackPtr, IntPtr contextPtr, int index)
+    static UInt32 InteropInvoke(IntPtr callbackPtr, IntPtr contextPtr, UInt32 numActions, int index)
 	{
 		GCHandle callbackHandle = (GCHandle)callbackPtr;
 		PolicyCallback<Ctx>^ callback = (PolicyCallback<Ctx>^)callbackHandle.Target;
@@ -204,7 +204,7 @@ internal:
 		GCHandle contextHandle = (GCHandle)contextPtr;
 		Ctx context = (Ctx)contextHandle.Target;
 
-		return callback->InvokePolicyCallback(context, index);
+        return callback->InvokePolicyCallback(context, numActions, index);
 	}
 
 private:
@@ -267,7 +267,7 @@ generic <class Ctx>
 public ref class ScorerCallback abstract
 {
 internal:
-	virtual List<float>^ InvokeScorerCallback(Ctx context) = 0;
+	virtual List<float>^ InvokeScorerCallback(Ctx context, UInt32 numActions) = 0;
 
 	ScorerCallback()
 	{
@@ -287,7 +287,7 @@ internal:
 		return m_native_scorer;
 	}
 
-	static void InteropInvoke(IntPtr callbackPtr, IntPtr contextPtr, IntPtr scoresPtr, IntPtr sizePtr)
+    static void InteropInvoke(IntPtr callbackPtr, IntPtr contextPtr, UInt32 numActions, IntPtr scoresPtr, IntPtr sizePtr)
 	{
 		GCHandle callbackHandle = (GCHandle)callbackPtr;
 		ScorerCallback<Ctx>^ callback = (ScorerCallback<Ctx>^)callbackHandle.Target;
@@ -295,7 +295,7 @@ internal:
 		GCHandle contextHandle = (GCHandle)contextPtr;
 		Ctx context = (Ctx)contextHandle.Target;
 
-		List<float>^ scoreList = callback->InvokeScorerCallback(context);
+        List<float>^ scoreList = callback->InvokeScorerCallback(context, numActions);
 		
 		if (scoreList == nullptr || scoreList->Count == 0)
 		{

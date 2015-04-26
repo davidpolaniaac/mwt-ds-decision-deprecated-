@@ -28,7 +28,7 @@ namespace ClientDecisionServiceTest
 
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: authToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: 2));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f));
 
             dsConfig.CommandCenterAddress = this.commandCenterAddress;
             dsConfig.LoggingServiceAddress = this.joinServerAddress;
@@ -64,7 +64,7 @@ namespace ClientDecisionServiceTest
 
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: authToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: 2));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f));
 
             dsConfig.CommandCenterAddress = this.commandCenterAddress;
             dsConfig.LoggingServiceAddress = this.joinServerAddress;
@@ -103,7 +103,7 @@ namespace ClientDecisionServiceTest
 
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: authToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: 2));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f));
 
             dsConfig.CommandCenterAddress = this.commandCenterAddress;
             dsConfig.LoggingServiceAddress = this.joinServerAddress;

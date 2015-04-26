@@ -27,13 +27,13 @@ namespace ClientDecisionServiceTest
 
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: this.authToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f));
             dsConfig.LoggingServiceAddress = this.joinServerAddress;
             dsConfig.CommandCenterAddress = this.commandCenterAddress;
 
             var ds = new DecisionService<TestContext>(dsConfig);
 
-            uint chosenAction = ds.ChooseAction(uniqueKey, new TestContext());
+            uint chosenAction = ds.ChooseAction(uniqueKey, new TestContext(), numActions: Constants.NumberOfActions);
 
             ds.Flush();
 
@@ -54,14 +54,14 @@ namespace ClientDecisionServiceTest
 
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: this.authToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f));
             dsConfig.LoggingServiceAddress = this.joinServerAddress;
             dsConfig.CommandCenterAddress = this.commandCenterAddress;
 
             var ds = new DecisionService<TestContext>(dsConfig);
 
-            uint chosenAction1 = ds.ChooseAction(uniqueKey, new TestContext());
-            uint chosenAction2 = ds.ChooseAction(uniqueKey, new TestContext());
+            uint chosenAction1 = ds.ChooseAction(uniqueKey, new TestContext(), numActions: Constants.NumberOfActions);
+            uint chosenAction2 = ds.ChooseAction(uniqueKey, new TestContext(), numActions: Constants.NumberOfActions);
             ds.ReportReward(1.0f, uniqueKey);
             ds.ReportOutcome(JsonConvert.SerializeObject(new { value = "test outcome" }), uniqueKey);
 

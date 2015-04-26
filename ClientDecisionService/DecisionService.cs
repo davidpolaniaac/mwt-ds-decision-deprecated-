@@ -17,6 +17,14 @@ using System.Threading.Tasks;
 
 namespace ClientDecisionService
 {
+    public interface IContext
+    {
+        object GetGlobalFeatures();
+        object GetActionFeatures(uint action);
+        int GetNumberOfActions();
+        string ToVWString();
+    }
+
     public interface IFeatureHasher
     {
         int ComputeHash(object obj);
@@ -44,6 +52,7 @@ namespace ClientDecisionService
     /// Encapsulates logic for recorder with async server communications & policy update.
     /// </summary>
     public class DecisionService<TContext> : IDisposable
+        where TContext : IContext
     {
         public DecisionService(DecisionServiceConfiguration<TContext> config)
         {
@@ -101,9 +110,9 @@ namespace ClientDecisionService
             logger.ReportOutcome(outcomeJson, uniqueKey);
         }
 
-        public uint ChooseAction(string uniqueKey, TContext context)
+        public uint ChooseAction(string uniqueKey, TContext context, uint numActions)
         {
-            return mwt.ChooseAction(explorer, uniqueKey, context);
+            return mwt.ChooseAction(explorer, uniqueKey, context, numActions);
         }
 
         public void Flush()

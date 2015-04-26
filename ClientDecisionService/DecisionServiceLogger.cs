@@ -18,6 +18,7 @@ using System.Reflection;
 namespace ClientDecisionService
 {
     internal class DecisionServiceLogger<TContext> : ILogger<TContext>, IDisposable
+        where TContext : IContext
     {
         public DecisionServiceLogger(BatchingConfiguration batchConfig, 
             Func<TContext, string> contextSerializer, 
