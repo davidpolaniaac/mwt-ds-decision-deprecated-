@@ -103,6 +103,32 @@ namespace ClientDecisionService
                 }
             }
 
+            // Cache global features
+            object globalFeatures = context.GetGlobalFeatures();
+            if (this.featureCache.Contains(globalFeatures))
+            {
+                //serializedCompressedContext.Append(reference);
+            }
+            else
+            {
+                //serializedCompressedContext.Append(value);
+            }
+
+            // Cache action features
+            int numActions = context.GetNumberOfActions();
+            for (int i = 0; i < numActions; i++)
+            {
+                object actionFeatures = context.GetActionFeatures(i);
+                if (this.featureCache.Contains(actionFeatures))
+                {
+                    //serializedCompressedContext.Append(reference);
+                }
+                else
+                {
+                    //serializedCompressedContext.Append(value);
+                }
+            }
+
             // Blocking call if queue is full.
             this.eventObserver.OnNext(new Interaction
             { 

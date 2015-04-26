@@ -17,13 +17,13 @@ using System.Threading.Tasks;
 
 namespace ClientDecisionService
 {
-    public interface IContext
-    {
-        object GetGlobalFeatures();
-        object GetActionFeatures(uint action);
-        int GetNumberOfActions();
-        string ToVWString();
-    }
+public interface IContext
+{
+    object GetGlobalFeatures();
+    object GetActionFeatures(int action);
+    int GetNumberOfActions();
+    string ToVWString();
+}
 
     public interface IFeatureHasher
     {

@@ -13,7 +13,7 @@ namespace ClientDecisionServiceTest
             return null;
         }
 
-        public object GetActionFeatures(uint action)
+        public object GetActionFeatures(int action)
         {
             return null;
         }
