@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using ClientDecisionService.Declarative;
 using ClientDecisionService.Declarative.MSN;
+using ClientDecisionService.Declarative.VW;
 using Newtonsoft.Json;
 
 namespace DeclarativeSample
@@ -16,17 +17,17 @@ namespace DeclarativeSample
             {
                 Id = "d1",
                 Time = new DateTime(2015, 1, 1),
-                Value = new[] {1.0, 2.0, 3.0}
+                Value = new LDAFeatureVector { Values = new[] { 1.0, 2.0, 3.0 } }
             };
 
-            var context = new MWTContext
+            var context = new MSNContextForMWT
             {
                 User = new UserFeature
                 {
-                    Age = 25,
+                    Age = Age.O,
                     Gender = Gender.Female
                 },
-                UserLDATopicPreference = new[] { 0.1, 0.2, 0.3 },
+                UserLDATopicPreference = new LDAFeatureVector { Values = new[] { 0.1, 0.2, 0.3 } },
                 Documents = new[]
                 {
                     d1,
@@ -34,7 +35,7 @@ namespace DeclarativeSample
                     {
                         Id = "d2",
                         Time = new DateTime(2015,1,1),
-                        Value = new [] { 1.0, 2.0, 3.0 }
+                        Value = new LDAFeatureVector { Values = new [] { 1.0, 2.0, 3.0 } }
                     },
                     d1
                 }
@@ -42,7 +43,7 @@ namespace DeclarativeSample
 
             var json = JsonConvert.SerializeObject(context, Formatting.Indented);
 
-            var vw = new VWSerializer().Serialize(context);
+            var vw = VWStringSerializer.Serialize(context);
 
             Console.WriteLine(json);
             Console.WriteLine(vw);

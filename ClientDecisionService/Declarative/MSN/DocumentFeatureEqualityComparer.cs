@@ -11,9 +11,9 @@ namespace ClientDecisionService.Declarative.MSN
         public bool Equals(DocumentFeature x, DocumentFeature y)
         {
             return x.Id == y.Id &&
-                   x.Time == y.Time &&
+                   x.Time == y.Time;
                 // maybe compare the full vector - not so sure on this part though
-                   x.Value.Zip(y.Value, (a, b) => a == b).All(c => c);
+                //   x.Value.Zip(y.Value, (a, b) => a == b).All(c => c);
         }
 
         public int GetHashCode(DocumentFeature obj)

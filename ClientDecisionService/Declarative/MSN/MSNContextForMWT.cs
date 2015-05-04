@@ -7,13 +7,13 @@ using Newtonsoft.Json;
 
 namespace ClientDecisionService.Declarative.MSN
 {
-    public class MWTContext
+    public class MSNContextForMWT
     {
-        [Feature(Namespace = "otheruser")]
+        [Feature(Namespace = "otheruser", FeatureGroup = 'o')]
         public UserFeature User { get; set; }
 
-        [Feature(Namespace = "userlda")]
-        public double[] UserLDATopicPreference { get; set; }
+        [Feature(Namespace = "userlda", FeatureGroup = 'u')]
+        public LDAFeatureVector UserLDATopicPreference { get; set; }
 
         [PerActionFeatures]
         [JsonProperty(ItemIsReference = true)]
