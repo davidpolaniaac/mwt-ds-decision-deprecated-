@@ -12,7 +12,7 @@ namespace ClientDecisionService
         internal static readonly string ModelAddress = "/Application/GetSelectedModel?token={0}&latest={1}";
         internal static readonly string MetadataAddress = "/Application/GetMetadata?token={0}";
 
-        internal static readonly string ServiceAddress = "http://decisionservice.cloudapp.net";
+        internal static readonly string ServiceAddress = "http://decisionservice-demo.cloudapp.net/";
         internal static readonly string ServicePostAddress = "/DecisionService.svc/PostExperimentalUnits";
         internal static readonly TimeSpan ConnectionTimeOut = TimeSpan.FromMinutes(5);
         internal static readonly string AuthenticationScheme = "Bearer";
