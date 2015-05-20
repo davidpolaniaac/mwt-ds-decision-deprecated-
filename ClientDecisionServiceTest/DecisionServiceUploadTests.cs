@@ -27,7 +27,6 @@ namespace ClientDecisionServiceTest
                 explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
 
             dsConfig.LoggingServiceAddress = MockJoinServer.MockJoinServerAddress;
-            dsConfig.ServiceAzureStorageConnectionString = MockCommandCenter.StorageConnectionString;
 
             var ds = new DecisionService<TestContext>(dsConfig);
 
@@ -54,7 +53,6 @@ namespace ClientDecisionServiceTest
                 explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
 
             dsConfig.LoggingServiceAddress = MockJoinServer.MockJoinServerAddress;
-            dsConfig.ServiceAzureStorageConnectionString = MockCommandCenter.StorageConnectionString;
 
             var ds = new DecisionService<TestContext>(dsConfig);
 
@@ -82,7 +80,6 @@ namespace ClientDecisionServiceTest
                 explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
 
             dsConfig.LoggingServiceAddress = MockJoinServer.MockJoinServerAddress;
-            dsConfig.ServiceAzureStorageConnectionString = MockCommandCenter.StorageConnectionString;
 
             var ds = new DecisionService<TestContext>(dsConfig);
 
