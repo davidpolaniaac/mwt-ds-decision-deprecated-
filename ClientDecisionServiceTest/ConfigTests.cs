@@ -55,6 +55,10 @@ namespace ClientDecisionServiceTest
         [TestMethod]
         public void TestUnauthorizedPathOutputDir()
         {
+            // TODO: In setup, set Constants.RedirectionBlobLocation to 
+            // http://127.0.0.1:10000/devstoreaccount1/app-locations/{0}
+            // based on TestCategory.
+
             joinServer.Reset();
 
             commandCenter.CreateBlobs(createSettingsBlob: true, createModelBlob: false);

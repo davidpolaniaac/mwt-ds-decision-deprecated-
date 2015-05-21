@@ -1,12 +1,29 @@
 ﻿using MultiWorldTesting;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Globalization;
+using Microsoft.Research.MachineLearning;
 
 namespace ClientDecisionService
 {
-    internal class DecisionServicePolicy<TContext> : IPolicy<TContext>, IDisposable
+    /// <summary>
+    /// Represent an updatable <see cref="IPolicy<TContext>"/> object which can consume different VowpalWabbit 
+    /// models to predict a list of actions from an object of specified <see cref="TContext"/> type. This type 
+    /// of object can also observe Azure Storage for newer model files.
+    /// </summary>
+    /// <typeparam name="TContext">The type of the context.</typeparam>
+    internal class DecisionServicePolicy<TContext> : VWPolicy<TContext>
     {
+        /// <summary>
+        /// Constructor using the specified configurations.
+        /// </summary>
+        /// <param name="modelAddress">Uri address of the model blob to observe.</param>
+        /// <param name="modelConnectionString">The connection string to access Azure Storage.</param>
+        /// <param name="modelOutputDir">The output directory to download model blob to.</param>
+        /// <param name="pollDelay">The polling delay which controls the frequency of checking for updates.</param>
+        /// <param name="notifyPolicyUpdate">The callback to trigger when a new model is updated successfully.</param>
+        /// <param name="modelPollFailureCallback">The callback to trigger when model polling fails.</param>
         public DecisionServicePolicy(string modelAddress, string modelConnectionString, 
             string modelOutputDir, TimeSpan pollDelay, 
             Action notifyPolicyUpdate, Action<Exception> modelPollFailureCallback)
@@ -15,45 +32,31 @@ namespace ClientDecisionService
             {
                 this.blobUpdater = new AzureBlobUpdater("model", modelAddress,
                    modelConnectionString, modelOutputDir, pollDelay,
-                   this.ModelUpdate, modelPollFailureCallback);
+                   this.UpdateFromFile, modelPollFailureCallback);
             }
 
             this.notifyPolicyUpdate = notifyPolicyUpdate;
         }
 
-        public uint[] ChooseAction(TContext context)
-        {
-            string exampleLine = string.Format(CultureInfo.InvariantCulture, "1: | {0}", context);
-
-            if (this.vw == null)
-            {
-                throw new Exception("Internal Error: Vowpal Wabbit has not been initialized for scoring.");
-            }
-
-            return this.vw.PredictMultilabel(exampleLine);
-        }
-
+        /// <summary>
+        /// Stop checking for new model update.
+        /// </summary>
         public void StopPolling()
         {
             if (this.blobUpdater != null)
             {
                 this.blobUpdater.StopPolling();
             }
-
-            if (this.vw != null)
-            {
-                this.vw.Finish();
-            }
         }
 
-        public void Dispose()
+        /// <summary>
+        /// Dispose the object.
+        /// </summary>
+        /// <param name="disposing">Whether the object is disposing resources.</param>
+        protected override void Dispose(bool disposing)
         {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+            base.Dispose(disposing);
 
-        private void Dispose(bool disposing)
-        {
             if (disposing)
             {
                 // free managed resources
@@ -63,47 +66,26 @@ namespace ClientDecisionService
                     this.blobUpdater = null;
                 }
             }
-
-            if (this.vw != null)
-            {
-                this.vw.Finish();
-            }
         }
 
-        void ModelUpdate(string modelFile)
+        /// <summary>
+        /// Update new model from file and trigger callback if success.
+        /// </summary>
+        /// <param name="modelFile">The model file to load from.</param>
+        /// <remarks>
+        /// Triggered when a new model blob is found.
+        /// </remarks>
+        internal void UpdateFromFile(string modelFile)
         {
-            bool modelUpdateSuccess = true;
+            bool modelUpdateSuccess = base.ModelUpdate(modelFile);
 
-            try
-            {
-                VowpalWabbitInstance oldVw = this.vw;
-                this.vw = new VowpalWabbitInstance(string.Format(CultureInfo.InvariantCulture, "-t -i {0}", modelFile));
-
-                if (oldVw != null)
-                {
-                    oldVw.Finish();
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError("Unable to initialize VW.");
-                Trace.TraceError(ex.ToString());
-                modelUpdateSuccess = false;
-            }
-
-            if (modelUpdateSuccess)
+            if (modelUpdateSuccess && this.notifyPolicyUpdate != null)
             {
                 this.notifyPolicyUpdate();
-            }
-            else
-            {
-                Trace.TraceInformation("Attempt to update model failed.");
             }
         }
 
         AzureBlobUpdater blobUpdater;
-
-        VowpalWabbitInstance vw;
 
         readonly Action notifyPolicyUpdate;
     }
