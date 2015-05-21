@@ -16,7 +16,7 @@ namespace ClientDecisionServiceTest
             this.token = token;
         }
 
-        public void CreateBlobs(bool createSettingsBlob, bool createModelBlob)
+        public void CreateBlobs(bool createSettingsBlob, bool createModelBlob, int modelId = 1)
         {
             if (createSettingsBlob || createModelBlob)
             {
@@ -37,7 +37,7 @@ namespace ClientDecisionServiceTest
                 if (createModelBlob)
                 {
                     var modelBlob = localContainer.GetBlockBlobReference(this.localAzureModelBlobName);
-                    byte[] modelContent = this.GetModelBlobContent();
+                    byte[] modelContent = this.GetModelBlobContent(modelId);
                     modelBlob.UploadFromByteArray(modelContent, 0, modelContent.Length);
                     this.localAzureModelBlobUri = modelBlob.Uri.ToString();
                 }
@@ -74,9 +74,10 @@ namespace ClientDecisionServiceTest
             return new byte[3] { 1, 2, 3 };
         }
 
-        public byte[] GetModelBlobContent()
+        public byte[] GetModelBlobContent(int modelId = 1)
         {
-            return new byte[2] { 5, 1 };
+            string modelFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TestData", "vw" + modelId + ".model");
+            return File.ReadAllBytes(modelFile);
         }
 
         public byte[] GetModelBlobContent(int numExamples, int numFeatureVectors)

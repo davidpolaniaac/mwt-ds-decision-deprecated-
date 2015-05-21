@@ -124,6 +124,15 @@
     <Compile Include="DecisionServiceUploadTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ModularTests.cs" />
+    <None Include="TestData\vw1.model">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestData\vw2.model">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestData\vw3.model">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ClientDecisionService\ClientDecisionService.csproj">
