@@ -94,12 +94,12 @@
       <HintPath>..\packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8\Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Research.MachineLearning.VowpalWabbit, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Microsoft.Research.VowpalWabbit.7.10.1.6\lib\net45\Microsoft.Research.MachineLearning.VowpalWabbit.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Research.VowpalWabbit.7.10.1.7\lib\net45\Microsoft.Research.MachineLearning.VowpalWabbit.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Research.MachineLearning.VowpalWabbitCore, Version=1.0.5617.20368, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Microsoft.Research.VowpalWabbit.7.10.1.6\lib\net45\Microsoft.Research.MachineLearning.VowpalWabbitCore.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Microsoft.Research.MachineLearning.VowpalWabbitCore, Version=1.0.5619.27691, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Research.VowpalWabbit.7.10.1.7\lib\net45\Microsoft.Research.MachineLearning.VowpalWabbitCore.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Configuration, Version=1.8.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

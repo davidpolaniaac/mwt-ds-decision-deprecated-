@@ -4,9 +4,9 @@ using System.Runtime.InteropServices;
 
 namespace ClientDecisionService
 {
-    using SizeT = IntPtr;
-    using VwExample = IntPtr;
-    using VwHandle = IntPtr;
+using SizeT = IntPtr;
+using VwExample = IntPtr;
+using VwHandle = IntPtr;
 
     internal enum VowpalWabbitState
     {
