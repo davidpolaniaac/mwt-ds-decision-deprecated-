@@ -1,15 +1,11 @@
 ﻿using Microsoft.Research.DecisionService.Common;
+using Microsoft.Research.MachineLearning;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ClientDecisionServiceTest
 {
@@ -81,6 +77,45 @@ namespace ClientDecisionServiceTest
         public byte[] GetModelBlobContent()
         {
             return new byte[2] { 5, 1 };
+        }
+
+        public byte[] GetModelBlobContent(int numExamples, int numFeatureVectors)
+        {
+            Random rg = new Random(numExamples + numFeatureVectors);
+
+            string localOutputDir = "test";
+            string vwFileName = Path.Combine(localOutputDir, string.Format("test_vw_{0}.model", numExamples));
+            string vwArgs = string.Format("--quiet --noconstant -f {0}", vwFileName);
+
+            using (var vw = new VowpalWabbit<TestADFContextWithFeatures>(vwArgs))
+            {
+                //Create examples
+                for (int ie = 0; ie < numExamples; ie++)
+                {
+                    // Create features
+                    var fv = new TestADFFeatures[numFeatureVectors];
+                    for (int i = 0; i < numFeatureVectors; i++)
+                    {
+                        fv[i] = new TestADFFeatures
+                        {
+                            Features = new string[] { rg.NextDouble().ToString(), rg.NextDouble().ToString(), rg.NextDouble().ToString() }
+                        };
+                    }
+
+                    using (VowpalWabbitExample example = vw.ReadExample(new TestADFContextWithFeatures
+                    {
+                        Shared = new string[] { "shared", "features" },
+                        ActionDependentFeatures = fv
+                    }))
+                    {
+                        example.Learn();
+                    }
+                }
+
+                vw.SaveModel();
+            }
+
+            return File.ReadAllBytes(vwFileName);
         }
 
         public string LocalAzureSettingsBlobName

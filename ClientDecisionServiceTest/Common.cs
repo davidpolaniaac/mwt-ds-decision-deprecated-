@@ -1,5 +1,6 @@
 ﻿using ClientDecisionService;
 using Microsoft.Research.MachineLearning;
+using Microsoft.Research.MachineLearning.Serializer.Attributes;
 using MultiWorldTesting;
 using Newtonsoft.Json;
 using System;
@@ -32,6 +33,25 @@ namespace ClientDecisionServiceTest
         }
 
         private int count;
+    }
+
+    public class TestADFContextWithFeatures : IActionDependentFeatureExample<TestADFFeatures>
+    {
+        [Feature]
+        public string[] Shared { get; set; }
+
+        public IReadOnlyList<TestADFFeatures> ActionDependentFeatures { get; set; }
+    }
+
+    public class TestADFFeatures
+    {
+        [Feature]
+        public string[] Features { get; set; }
+
+        public override string ToString()
+        {
+            return string.Join(" ", this.Features);
+        }
     }
 
 
