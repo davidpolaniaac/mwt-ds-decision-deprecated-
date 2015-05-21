@@ -1,4 +1,5 @@
 ﻿using ClientDecisionService;
+using Microsoft.Research.MachineLearning;
 using MultiWorldTesting;
 using Newtonsoft.Json;
 using System;
@@ -9,6 +10,31 @@ namespace ClientDecisionServiceTest
 {
     class TestContext { }
 
+    class TestADFContext : IActionDependentFeatureExample<string>
+    {
+        public TestADFContext(int count)
+        {
+            this.count = count;
+        }
+
+        public IReadOnlyList<string> ActionDependentFeatures
+        {
+            get
+            {
+                var features = new string[count];
+                for (int i = 0; i < count; i++)
+                {
+                    features[i] = i.ToString();
+                }
+
+                return features;
+            }
+        }
+
+        private int count;
+    }
+
+
     class TestOutcome { }
 
     class TestPolicy : IPolicy<TestContext>
@@ -17,6 +43,15 @@ namespace ClientDecisionServiceTest
         {
             // Always returns the same action regardless of context
             return Enumerable.Range(1, (int)Constants.NumberOfActions).Select(m => (uint)m).ToArray();
+        }
+    }
+
+    class TestADFPolicy : IPolicy<TestADFContext>
+    {
+        public uint[] ChooseAction(TestADFContext context)
+        {
+            // Always returns the same action regardless of context
+            return Enumerable.Range(1, (int)context.ActionDependentFeatures.Count).Select(m => (uint)m).ToArray();
         }
     }
 

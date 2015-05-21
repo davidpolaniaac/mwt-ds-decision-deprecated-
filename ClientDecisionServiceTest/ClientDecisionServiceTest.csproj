@@ -68,6 +68,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.Data.Services.Client.5.6.2\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Research.MachineLearning.VowpalWabbit, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Research.VowpalWabbit.7.10.1.6\lib\net45\Microsoft.Research.MachineLearning.VowpalWabbit.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Research.MachineLearning.VowpalWabbitCore, Version=1.0.5617.20368, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Research.VowpalWabbit.7.10.1.6\lib\net45\Microsoft.Research.MachineLearning.VowpalWabbitCore.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.WindowsAzure.Configuration, Version=1.8.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.1.8.0.0\lib\net35-full\Microsoft.WindowsAzure.Configuration.dll</HintPath>
@@ -110,6 +118,7 @@
     <Compile Include="MockCommandCenter.cs" />
     <Compile Include="MockHttpServer.cs" />
     <Compile Include="ConfigTests.cs" />
+    <Compile Include="ActionDependentFeaturesTest.cs" />
     <Compile Include="RawStringConverter.cs" />
     <Compile Include="UploaderTest.cs" />
     <Compile Include="DecisionServiceUploadTests.cs" />

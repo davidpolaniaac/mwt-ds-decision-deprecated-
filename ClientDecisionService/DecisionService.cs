@@ -1,20 +1,11 @@
-﻿using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
-using Microsoft.Research.DecisionService.Common;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.RetryPolicies;
+﻿using Microsoft.Research.DecisionService.Common;
+using Microsoft.Research.MachineLearning;
 using MultiWorldTesting;
 using Newtonsoft.Json;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ClientDecisionService
 {
@@ -80,7 +71,7 @@ namespace ClientDecisionService
                 }
             }
 
-            mwt = new MwtExplorer<TContext>(config.AuthorizationToken, this.recorder);
+            mwt = new MwtExplorer<TContext>(config.AuthorizationToken, this.recorder, this.GetNumberOfActions);
         }
 
         /// <summary>
@@ -160,6 +151,17 @@ namespace ClientDecisionService
         }
 
         public void Dispose() { }
+
+        internal uint GetNumberOfActions(TContext context)
+        {
+            var actionDependentContext = context as IActionDependentFeatureExample<object>;
+            if (actionDependentContext == null)
+            {
+                throw new ArgumentException("The provided context does not implement IActionDependentFeatureExample interface", "context");
+            }
+
+            return (uint)actionDependentContext.ActionDependentFeatures.Count;
+        }
 
         private ApplicationTransferMetadata GetBlobLocations(string token, string redirectionBlobLocation)
         {

@@ -1,5 +1,6 @@
 ﻿using ClientDecisionService;
 using Microsoft.Research.DecisionService.Uploader;
+using Microsoft.Research.MachineLearning;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using MultiWorldTesting;
@@ -25,7 +26,7 @@ namespace ClientDecisionServiceSample
 
             try
             {
-                TestServiceCommmunication();
+                SampleCodeUsingActionDependentFeatures();
             }
             catch (Exception e)
             {
@@ -172,42 +173,31 @@ namespace ClientDecisionServiceSample
             }
         }
 
-        private static void SampleCode()
+        private static void SampleCodeUsingActionDependentFeatures()
         {
             // Create configuration for the decision service
-            var serviceConfig = new DecisionServiceConfiguration<UserContext>(
-                authorizationToken: "",
-                explorer: new EpsilonGreedyExplorer<UserContext>(new UserPolicy(10), epsilon: 0.2f, numActions: 10))
+            var serviceConfig = new DecisionServiceConfiguration<ADFContext>(
+                authorizationToken: "10198550-a074-4f9c-8b15-cc389bc2bbbe",
+                explorer: new EpsilonGreedyExplorer<ADFContext>(new ADFPolicy(), epsilon: 0.8f))
             //explorer = new TauFirstExplorer<MyContext>(new UserPolicy(), tau: 50, numActions: 10))
             //explorer = new BootstrapExplorer<MyContext>(new IPolicy<MyContext>[2] { new UserPolicy(), new UserPolicy() }, numActions: 10))
             //explorer = new SoftmaxExplorer<MyContext>(new UserScorer(), lambda: 0.5f, numActions: 10))
             //explorer = new GenericExplorer<MyContext>(new UserScorer(), numActions: 10))
             {
-                // Configure batching logic if desired
-                JoinServiceBatchConfiguration = new BatchingConfiguration()
-                {
-                    MaxDuration = TimeSpan.FromMilliseconds(5000),
-                    MaxEventCount = 2,
-                    MaxBufferSizeInBytes = 10 * 1024 * 1024,
-                    MaxUploadQueueCapacity = 2,
-                    UploadRetryPolicy = BatchUploadRetryPolicy.ExponentialRetry
-                },
-
-                // Set a custom json serializer for the context
-                //ContextJsonSerializer = context => "My Context Json",
+                PollingForModelPeriod = TimeSpan.MinValue,
+                PollingForSettingsPeriod = TimeSpan.MinValue
             };
 
-            var service = new DecisionService<UserContext>(serviceConfig);
+            var service = new DecisionService<ADFContext>(serviceConfig);
 
             string uniqueKey = "eventid";
-            uint[] action = service.ChooseAction(uniqueKey, new UserContext());
 
-            // Report outcome as a JSON
-            service.ReportOutcome("my json outcome", uniqueKey);
-            // Report (simple) reward as a simple float
-            service.ReportReward(0.5f, uniqueKey);
+            for (int i = 1; i < 100; i++)
+            {
+                uint[] action = service.ChooseAction(uniqueKey, new ADFContext(i));
+                service.ReportReward(i / 100f, uniqueKey);
+            }
 
-            // Synchronous flush
             service.Flush();
         }
 
@@ -361,6 +351,30 @@ namespace ClientDecisionServiceSample
         public IDictionary<string, float> FeatureVector { get; set; }
     }
 
+    class ADFContext : IActionDependentFeatureExample<string>
+    {
+        public ADFContext(int count)
+        {
+            this.count = count;
+        }
+
+        public IReadOnlyList<string> ActionDependentFeatures
+        {
+            get
+            {
+                var features = new string[count];
+                for (int i = 0; i < count; i++)
+                {
+                    features[i] = i.ToString();
+                }
+
+                return features;
+            }
+        }
+
+        private int count;
+    }
+
     class MyOutcome { }
 
     class MyAzureRecorder : IRecorder<UserContext>
@@ -384,6 +398,14 @@ namespace ClientDecisionServiceSample
         }
 
         int numActions;
+    }
+
+    class ADFPolicy : IPolicy<ADFContext>
+    {
+        public uint[] ChooseAction(ADFContext context)
+        {
+            return Enumerable.Range(1, context.ActionDependentFeatures.Count).Select(a => (uint)a).ToArray();
+        }
     }
 
     class UserScorer : IScorer<UserContext>
