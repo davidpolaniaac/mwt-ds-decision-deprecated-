@@ -41,6 +41,25 @@ namespace ClientDecisionServiceTest
         public string[] Shared { get; set; }
 
         public IReadOnlyList<TestADFFeatures> ActionDependentFeatures { get; set; }
+
+        public static TestADFContextWithFeatures CreateRandom(int numActions, Random rg)
+        {
+            var fv = new TestADFFeatures[numActions];
+            for (int i = 0; i < numActions; i++)
+            {
+                fv[i] = new TestADFFeatures
+                {
+                    Features = new string[] { rg.NextDouble().ToString(), rg.NextDouble().ToString(), rg.NextDouble().ToString() }
+                };
+            }
+
+            var context = new TestADFContextWithFeatures
+            {
+                Shared = new string[] { "shared", "features" },
+                ActionDependentFeatures = fv
+            };
+            return context;
+        }
     }
 
     public class TestADFFeatures
@@ -69,6 +88,15 @@ namespace ClientDecisionServiceTest
     class TestADFPolicy : IPolicy<TestADFContext>
     {
         public uint[] ChooseAction(TestADFContext context)
+        {
+            // Always returns the same action regardless of context
+            return Enumerable.Range(1, (int)context.ActionDependentFeatures.Count).Select(m => (uint)m).ToArray();
+        }
+    }
+
+    class TestADFWithFeaturesPolicy : IPolicy<TestADFContextWithFeatures>
+    {
+        public uint[] ChooseAction(TestADFContextWithFeatures context)
         {
             // Always returns the same action regardless of context
             return Enumerable.Range(1, (int)context.ActionDependentFeatures.Count).Select(m => (uint)m).ToArray();

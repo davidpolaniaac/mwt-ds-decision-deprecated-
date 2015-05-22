@@ -59,9 +59,11 @@ namespace ClientDecisionService
             VowpalWabbitModel vwModel = null;
             try
             {
+                // TODO: what if path to model contains spaces?
+                string vwArgs = string.Format("--cb_adf --rank_all -t -i {0}", modelFile);
                 // TODO: add Dispose to ObjectPool using reference couting to dispose the shared model correctly.
                 // otherwise this is wasting memory as the shared model is never freed.
-                vwModel = new VowpalWabbitModel(modelFile);
+                vwModel = new VowpalWabbitModel(vwArgs);
             }
             catch (Exception ex)
             {

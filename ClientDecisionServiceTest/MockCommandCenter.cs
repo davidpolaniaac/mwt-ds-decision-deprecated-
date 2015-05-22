@@ -94,20 +94,9 @@ namespace ClientDecisionServiceTest
                 for (int ie = 0; ie < numExamples; ie++)
                 {
                     // Create features
-                    var fv = new TestADFFeatures[numFeatureVectors];
-                    for (int i = 0; i < numFeatureVectors; i++)
-                    {
-                        fv[i] = new TestADFFeatures
-                        {
-                            Features = new string[] { rg.NextDouble().ToString(), rg.NextDouble().ToString(), rg.NextDouble().ToString() }
-                        };
-                    }
+                    var context = TestADFContextWithFeatures.CreateRandom(numFeatureVectors, rg);
 
-                    using (VowpalWabbitExample example = vw.ReadExample(new TestADFContextWithFeatures
-                    {
-                        Shared = new string[] { "shared", "features" },
-                        ActionDependentFeatures = fv
-                    }))
+                    using (VowpalWabbitExample example = vw.ReadExample(context))
                     {
                         example.Learn();
                     }
