@@ -96,7 +96,7 @@ namespace ClientDecisionServiceTest
                     // Create features
                     var context = TestADFContextWithFeatures.CreateRandom(numFeatureVectors, rg);
 
-                    using (VowpalWabbitExample example = vw.ReadExample(context))
+                    using (var example = vw.ReadExample(context))
                     {
                         example.Learn();
                     }
