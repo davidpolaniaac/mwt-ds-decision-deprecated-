@@ -1,6 +1,7 @@
 ﻿using ClientDecisionService;
 using Microsoft.Research.DecisionService.Uploader;
 using Microsoft.Research.MachineLearning;
+using Microsoft.Research.MachineLearning.Interfaces;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using MultiWorldTesting;

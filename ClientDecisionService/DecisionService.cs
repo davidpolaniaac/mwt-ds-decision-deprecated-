@@ -1,5 +1,6 @@
 ﻿using Microsoft.Research.DecisionService.Common;
 using Microsoft.Research.MachineLearning;
+using Microsoft.Research.MachineLearning.Interfaces;
 using MultiWorldTesting;
 using Newtonsoft.Json;
 using System;

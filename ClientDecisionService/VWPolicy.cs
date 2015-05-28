@@ -1,4 +1,5 @@
 ﻿using Microsoft.Research.MachineLearning;
+using Microsoft.Research.MachineLearning.Interfaces;
 using MultiWorldTesting;
 using System;
 using System.Diagnostics;
@@ -21,10 +22,7 @@ namespace ClientDecisionService
         {
             if (vwModelFile == null)
             {
-                this.vwPool = new ObjectPool<VowpalWabbit<TContext>>(() =>
-                {
-                    throw new InvalidOperationException("Internal Error: Vowpal Wabbit has not been initialized for scoring.");
-                });
+                this.vwPool = new ObjectPool<VowpalWabbit<TContext>>(null);
             }
             else
             {
@@ -43,6 +41,8 @@ namespace ClientDecisionService
             using (var example = vw.Value.ReadExample(context))
             {
                 example.Predict();
+
+                example.Finish();
 
                 // VW multi-label predictions are 0-based
                 return example.MultilabelPredictions.Select(p => (uint)(p + 1)).ToArray();
@@ -73,14 +73,17 @@ namespace ClientDecisionService
                 return false;
             }
 
+            var factory = new VowpalWabbitFactory<TContext>(vwModel);
+
             if (this.vwPool == null)
             {
-                this.vwPool = new ObjectPool<VowpalWabbit<TContext>>(() => CreateNewVW(vwModel));
+                this.vwPool = new ObjectPool<VowpalWabbit<TContext>>(factory);
             }
             else
             {
-                vwPool.UpdateFactory(() => CreateNewVW(vwModel));
+                vwPool.UpdateFactory(factory);
             }
+
             return true;
         }
 
@@ -107,11 +110,6 @@ namespace ClientDecisionService
                     this.vwPool = null;
                 }
             }
-        }
-
-        private VowpalWabbit<TContext> CreateNewVW(VowpalWabbitModel model)
-        {
-            return new VowpalWabbit<TContext>(model);
         }
 
         private ObjectPool<VowpalWabbit<TContext>> vwPool;

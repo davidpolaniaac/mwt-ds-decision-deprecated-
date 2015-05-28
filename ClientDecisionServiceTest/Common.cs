@@ -1,5 +1,6 @@
 ﻿using ClientDecisionService;
 using Microsoft.Research.MachineLearning;
+using Microsoft.Research.MachineLearning.Interfaces;
 using Microsoft.Research.MachineLearning.Serializer.Attributes;
 using MultiWorldTesting;
 using Newtonsoft.Json;
