@@ -16,6 +16,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Microsoft.Research.MachineLearning.Labels;
+using Microsoft.Research.MachineLearning.Serializer.Attributes;
 
 namespace ClientDecisionServiceSample
 {
@@ -193,13 +195,73 @@ namespace ClientDecisionServiceSample
 
             string uniqueKey = "eventid";
 
+            var rg = new Random(uniqueKey.GetHashCode());
+
+            var vwPolicy = new VWPolicy<ADFContext,ADFFeatures>();
+
             for (int i = 1; i < 100; i++)
             {
-                uint[] action = service.ChooseAction(uniqueKey, new ADFContext(i));
+                if (i == 30)
+                {
+                    string vwModelFile = TrainNewVWModelWithRandomData(numExamples: 5, numActions: 10);
+
+                    vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(vwModelFile);
+
+                    // Manually updates decision service with a new policy for consuming VW models.
+                    service.UpdatePolicy(vwPolicy);
+                }
+                if (i == 60)
+                {
+                    string vwModelFile = TrainNewVWModelWithRandomData(numExamples: 6, numActions: 8);
+
+                    // Evolves the existing VWPolicy with a new model
+                    vwPolicy.ModelUpdate(vwModelFile);
+                }
+
+                int numActions = rg.Next(5, 10);
+                uint[] action = service.ChooseAction(uniqueKey, ADFContext.CreateRandom(numActions, rg));
                 service.ReportReward(i / 100f, uniqueKey);
             }
 
             service.Flush();
+        }
+
+        /// <summary>
+        /// Train a contextual bandit with action dependent features VW model using randomly generated data.
+        /// </summary>
+        /// <param name="numExamples">Number of examples to generate.</param>
+        /// <param name="numActions">Number of actions to use to generate action dependent features for each example.</param>
+        /// <returns>New VW model file path.</returns>
+        private static string TrainNewVWModelWithRandomData(int numExamples, int numActions)
+        {
+            Random rg = new Random(numExamples + numActions);
+
+            string vwFileName = string.Format("sample_vw_{0}.model", numExamples);
+            if (File.Exists(vwFileName))
+            {
+                return vwFileName;
+            }
+
+            string vwArgs = "--cb_adf --rank_all";
+
+            using (var vw = new VowpalWabbit<ADFContext, ADFFeatures>(vwArgs))
+            {
+                //Create examples
+                for (int ie = 0; ie < numExamples; ie++)
+                {
+                    // Create features
+                    var context = ADFContext.CreateRandom(numActions, rg);
+                    if (ie == 0)
+                    {
+                        context.Shared = new string[] { "s_1", "s_2" };
+                    }
+
+                    vw.Learn(context);
+                }
+
+                vw.SaveModel(vwFileName);
+            }
+            return vwFileName;
         }
 
         static void TestServiceCommmunication()
@@ -352,28 +414,55 @@ namespace ClientDecisionServiceSample
         public IDictionary<string, float> FeatureVector { get; set; }
     }
 
-    class ADFContext : IActionDependentFeatureExample<string>
+    public class ADFContext : SharedExample, IActionDependentFeatureExample<ADFFeatures>
     {
-        public ADFContext(int count)
-        {
-            this.count = count;
-        }
+        [Feature]
+        public string[] Shared { get; set; }
 
-        public IReadOnlyList<string> ActionDependentFeatures
+        public IReadOnlyList<ADFFeatures> ActionDependentFeatures { get; set; }
+
+        public static ADFContext CreateRandom(int numActions, Random rg)
         {
-            get
+            int iCB = rg.Next(0, numActions);
+
+            var fv = new ADFFeatures[numActions];
+            for (int i = 0; i < numActions; i++)
             {
-                var features = new string[count];
-                for (int i = 0; i < count; i++)
+                fv[i] = new ADFFeatures
                 {
-                    features[i] = i.ToString();
-                }
+                    Features = new[] { "a_" + (i + 1), "b_" + (i + 1), "c_" + (i + 1) }
+                };
 
-                return features;
+                if (i == iCB) // Randomly place a Contextual Bandit label
+                {
+                    fv[i].Label = new ContextualBanditLabel
+                    {
+                        Cost = (float)rg.NextDouble(),
+                        Probability = (float)rg.NextDouble()
+                    };
+                }
             }
+
+            var context = new ADFContext
+            {
+                Shared = new string[] { "shared", "features" },
+                ActionDependentFeatures = fv
+            };
+            return context;
+        }
+    }
+
+    public class ADFFeatures : IExample
+    {
+        [Feature]
+        public string[] Features { get; set; }
+
+        public override string ToString()
+        {
+            return string.Join(" ", this.Features);
         }
 
-        private int count;
+        public ILabel Label { get; set; }
     }
 
     class MyOutcome { }
