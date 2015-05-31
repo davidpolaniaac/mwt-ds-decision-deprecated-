@@ -12,7 +12,8 @@ namespace ClientDecisionService
     /// models to predict a list of actions from an object of specified <see cref="TContext"/> type.
     /// </summary>
     /// <typeparam name="TContext">The type of the context.</typeparam>
-    public class VWPolicy<TContext> : IPolicy<TContext>, IDisposable
+    public class VWPolicy<TContext, TActionDependentFeature> : IPolicy<TContext>, IDisposable
+        where TContext : SharedExample, IActionDependentFeatureExample<TActionDependentFeature>
     {
         /// <summary>
         /// Constructor using an optional model file.
@@ -22,7 +23,7 @@ namespace ClientDecisionService
         {
             if (vwModelFile == null)
             {
-                this.vwPool = new ObjectPool<VowpalWabbit<TContext>>(null);
+                this.vwPool = new ObjectPool<VowpalWabbit<TContext, TActionDependentFeature>>(null);
             }
             else
             {
@@ -38,14 +39,11 @@ namespace ClientDecisionService
         public uint[] ChooseAction(TContext context)
         {
             using (var vw = vwPool.Get())
-            using (var example = vw.Value.ReadExample(context))
             {
-                example.Predict();
-
-                example.Finish();
+                int[] vwMultilabelPredictions = vw.Value.PredictIndex(context);
 
                 // VW multi-label predictions are 0-based
-                return example.MultilabelPredictions.Select(p => (uint)(p + 1)).ToArray();
+                return vwMultilabelPredictions.Select(p => (uint)(p + 1)).ToArray();
             }
         }
 
@@ -60,7 +58,7 @@ namespace ClientDecisionService
             try
             {
                 // TODO: what if path to model contains spaces?
-                string vwArgs = string.Format("--cb_adf --rank_all -t -i {0}", modelFile);
+                string vwArgs = string.Format("--csoaa_rank --rank_all -t -i {0}", modelFile);
                 // TODO: add Dispose to ObjectPool using reference couting to dispose the shared model correctly.
                 // otherwise this is wasting memory as the shared model is never freed.
                 vwModel = new VowpalWabbitModel(vwArgs);
@@ -73,11 +71,11 @@ namespace ClientDecisionService
                 return false;
             }
 
-            var factory = new VowpalWabbitFactory<TContext>(vwModel);
+            var factory = new VowpalWabbitFactory<TContext, TActionDependentFeature>(vwModel);
 
             if (this.vwPool == null)
             {
-                this.vwPool = new ObjectPool<VowpalWabbit<TContext>>(factory);
+                this.vwPool = new ObjectPool<VowpalWabbit<TContext, TActionDependentFeature>>(factory);
             }
             else
             {
@@ -112,6 +110,6 @@ namespace ClientDecisionService
             }
         }
 
-        private ObjectPool<VowpalWabbit<TContext>> vwPool;
+        private ObjectPool<VowpalWabbit<TContext, TActionDependentFeature>> vwPool;
     }
 }

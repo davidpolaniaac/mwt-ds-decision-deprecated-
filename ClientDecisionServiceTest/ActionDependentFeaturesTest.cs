@@ -53,26 +53,37 @@ namespace ClientDecisionServiceTest
         {
             joinServer.Reset();
 
-            commandCenter.CreateBlobs(createSettingsBlob: true, createModelBlob: true, modelId: 1);
-
             var dsConfig = new DecisionServiceConfiguration<TestADFContextWithFeatures>(
                 authorizationToken: MockCommandCenter.AuthorizationToken,
                 explorer: new EpsilonGreedyExplorer<TestADFContextWithFeatures>(new TestADFWithFeaturesPolicy(), epsilon: 0.5f))
             {
-                LoggingServiceAddress = MockJoinServer.MockJoinServerAddress
+                LoggingServiceAddress = MockJoinServer.MockJoinServerAddress,
+                PollingForModelPeriod = TimeSpan.MinValue,
+                PollingForSettingsPeriod = TimeSpan.MinValue
             };
 
             var ds = new DecisionService<TestADFContextWithFeatures>(dsConfig);
 
             string uniqueKey = "eventid";
 
+            string modelFile = "test_vw_adf{0}.model";
+            var actualModelFiles = new List<string>();
+
             for (int i = 1; i <= 100; i++)
             {
                 Random rg = new Random(i);
 
-                if (i % 50 == 0)
+                if (i % 50 == 1)
                 {
-                    commandCenter.CreateBlobs(createSettingsBlob: false, createModelBlob: true, modelId: 2);
+                    int modelIndex = i / 50;
+                    string currentModelFile = string.Format(modelFile, modelIndex);
+
+                    byte[] modelContent = commandCenter.GetModelBlobContent(numExamples: 3 + modelIndex, numFeatureVectors: 4 + modelIndex);
+                    System.IO.File.WriteAllBytes(currentModelFile, modelContent);
+
+                    ds.UpdatePolicy(new VWPolicy<TestADFContextWithFeatures, TestADFFeatures>(currentModelFile));
+
+                    actualModelFiles.Add(currentModelFile);
                 }
 
                 int numActions = rg.Next(5, 20);
@@ -89,13 +100,16 @@ namespace ClientDecisionServiceTest
                 Assert.AreEqual((numActions * (numActions + 1)) / 2, action.Sum(a => a));
 
                 ds.ReportReward(i / 100f, uniqueKey);
-
-                System.Threading.Thread.Sleep(200);
             }
 
             ds.Flush();
 
             Assert.AreEqual(200, joinServer.EventBatchList.Sum(b => b.ExperimentalUnitFragments.Count));
+
+            foreach (string actualModelFile in actualModelFiles)
+            {
+                System.IO.File.Delete(actualModelFile);
+            }
         }
 
         [TestInitialize]

@@ -50,16 +50,6 @@ namespace ClientDecisionService
                             this.UpdateSettings,
                             config.SettingsPollFailureCallback);
                     }
-
-                    if (this.modelBlobPollDelay != TimeSpan.MinValue)
-                    {
-                        this.policy = new DecisionServicePolicy<TContext>(
-                        metadata.ModelBlobUri, metadata.ConnectionString,
-                        config.BlobOutputDir,
-                        this.modelBlobPollDelay,
-                        this.InternalPolicyUpdated,
-                        config.ModelPollFailureCallback);
-                    }
                 }
                 
             }
@@ -139,11 +129,6 @@ namespace ClientDecisionService
                 blobUpdater.StopPolling();
             }
 
-            if (policy != null)
-            {
-                policy.StopPolling();
-            }
-
             ILogger<TContext> logger = this.recorder as ILogger<TContext>;
             if (logger != null)
             {
@@ -206,17 +191,12 @@ namespace ClientDecisionService
             
         }
 
-        private void InternalPolicyUpdated()
-        {
-            UpdateInternalPolicy(policy);
-        }
-
         private void UpdateInternalPolicy(IPolicy<TContext> newPolicy)
         {
             IConsumePolicy<TContext> consumePolicy = explorer as IConsumePolicy<TContext>;
             if (consumePolicy != null)
             {
-                consumePolicy.UpdatePolicy(policy);
+                consumePolicy.UpdatePolicy(newPolicy);
                 Trace.TraceInformation("Model update succeeded.");
             }
             else
@@ -227,7 +207,6 @@ namespace ClientDecisionService
         }
 
         public IRecorder<TContext> Recorder { get { return recorder; } }
-        public IPolicy<TContext> Policy { get { return policy; } }
 
         private readonly TimeSpan settingsBlobPollDelay;
         private readonly TimeSpan modelBlobPollDelay;
@@ -236,7 +215,6 @@ namespace ClientDecisionService
 
         private readonly IExplorer<TContext> explorer;
         private readonly IRecorder<TContext> recorder;
-        private readonly DecisionServicePolicy<TContext> policy;
         private readonly MwtExplorer<TContext> mwt;
     }
 }

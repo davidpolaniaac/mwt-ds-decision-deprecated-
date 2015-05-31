@@ -1,6 +1,7 @@
 ﻿using ClientDecisionService;
 using Microsoft.Research.MachineLearning;
 using Microsoft.Research.MachineLearning.Interfaces;
+using Microsoft.Research.MachineLearning.Labels;
 using Microsoft.Research.MachineLearning.Serializer.Attributes;
 using MultiWorldTesting;
 using Newtonsoft.Json;
@@ -36,7 +37,7 @@ namespace ClientDecisionServiceTest
         private int count;
     }
 
-    public class TestADFContextWithFeatures : IActionDependentFeatureExample<TestADFFeatures>
+    public class TestADFContextWithFeatures : SharedExample, IActionDependentFeatureExample<TestADFFeatures>
     {
         [Feature]
         public string[] Shared { get; set; }
@@ -45,13 +46,24 @@ namespace ClientDecisionServiceTest
 
         public static TestADFContextWithFeatures CreateRandom(int numActions, Random rg)
         {
+            int iCB = rg.Next(0, numActions);
+
             var fv = new TestADFFeatures[numActions];
             for (int i = 0; i < numActions; i++)
             {
                 fv[i] = new TestADFFeatures
                 {
-                    Features = new string[] { rg.NextDouble().ToString(), rg.NextDouble().ToString(), rg.NextDouble().ToString() }
+                    Features = new [] { "a_" + (i + 1), "b_" + (i + 1), "c_" + (i + 1) }
                 };
+
+                if (i == iCB) // Randomly place a Contextual Bandit label
+                {
+                    fv[i].Label = new ContextualBanditLabel 
+                    { 
+                        Cost = (float)rg.NextDouble(),
+                        Probability = (float)rg.NextDouble()
+                    };
+                }
             }
 
             var context = new TestADFContextWithFeatures
@@ -63,7 +75,7 @@ namespace ClientDecisionServiceTest
         }
     }
 
-    public class TestADFFeatures
+    public class TestADFFeatures : IExample
     {
         [Feature]
         public string[] Features { get; set; }
@@ -72,6 +84,8 @@ namespace ClientDecisionServiceTest
         {
             return string.Join(" ", this.Features);
         }
+
+        public ILabel Label { get; set; }
     }
 
 

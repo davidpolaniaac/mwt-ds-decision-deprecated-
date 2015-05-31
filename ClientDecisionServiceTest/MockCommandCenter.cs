@@ -86,26 +86,31 @@ namespace ClientDecisionServiceTest
 
             string localOutputDir = "test";
             string vwFileName = Path.Combine(localOutputDir, string.Format("test_vw_{0}.model", numExamples));
-            string vwArgs = string.Format("--quiet --noconstant -f {0}", vwFileName);
+            string vwArgs = "--cb_adf --rank_all";
 
-            using (var vw = new VowpalWabbit<TestADFContextWithFeatures>(vwArgs))
+            using (var vw = new VowpalWabbit<TestADFContextWithFeatures, TestADFFeatures>(vwArgs))
             {
                 //Create examples
                 for (int ie = 0; ie < numExamples; ie++)
                 {
                     // Create features
                     var context = TestADFContextWithFeatures.CreateRandom(numFeatureVectors, rg);
-
-                    using (var example = vw.ReadExample(context))
+                    if (ie == 0)
                     {
-                        example.Learn();
+                        context.Shared = new string[] { "s_1", "s_2" };
                     }
+
+                    vw.Learn(context);
                 }
 
-                vw.SaveModel();
+                vw.SaveModel(vwFileName);
             }
 
-            return File.ReadAllBytes(vwFileName);
+            byte[] vwModelBytes = File.ReadAllBytes(vwFileName);
+
+            Directory.Delete(localOutputDir, recursive: true);
+
+            return vwModelBytes;
         }
 
         public string LocalAzureSettingsBlobName
