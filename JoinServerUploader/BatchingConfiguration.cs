@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Serialization;
+using System;
 
 namespace Microsoft.Research.DecisionService.Uploader
 {
@@ -34,6 +35,11 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// Gets or sets the retry policy in case of upload failure.
         /// </summary>
         public BatchUploadRetryPolicy UploadRetryPolicy { get; set; }
+
+        /// <summary>
+        /// Gets or sets the reference resolver to be used with JSON.NET.
+        /// </summary>
+        public IReferenceResolver ReferenceResolver { get; set; }
     }
 
     /// <summary>

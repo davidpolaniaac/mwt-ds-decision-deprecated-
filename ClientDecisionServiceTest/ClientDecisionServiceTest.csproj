@@ -119,6 +119,7 @@
     <Compile Include="MockHttpServer.cs" />
     <Compile Include="ConfigTests.cs" />
     <Compile Include="ActionDependentFeaturesTest.cs" />
+    <Compile Include="MultiRequestReferenceResolverTests.cs" />
     <Compile Include="RawStringConverter.cs" />
     <Compile Include="UploaderTest.cs" />
     <Compile Include="DecisionServiceUploadTests.cs" />

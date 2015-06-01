@@ -116,6 +116,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="IHttpClient.cs" />
     <Compile Include="IHttpResponse.cs" />
+    <Compile Include="MultiRequestReferenceResolver.cs" />
     <Compile Include="RawStringConverter.cs" />
     <Compile Include="DecisionServiceTransientErrorDetectionStrategy.cs" />
     <Compile Include="Constants.cs" />

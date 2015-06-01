@@ -46,7 +46,22 @@ namespace Microsoft.Research.DecisionService.Uploader
 
             this.httpClient = httpClient ?? new UploaderHttpClient();
 
-            this.eventSource = new TransformBlock<IEvent, string>(ev => JsonConvert.SerializeObject(new ExperimentalUnitFragment { Key = ev.Key, Value = ev }),
+            // override ReferenceResolver is supplied
+            Func<IEvent, string> serializer;
+            if (this.batchConfig.ReferenceResolver == null)
+            {
+                serializer = ev => JsonConvert.SerializeObject(new ExperimentalUnitFragment { Key = ev.Key, Value = ev });
+            }
+            else
+            {
+                serializer = ev => JsonConvert.SerializeObject(
+                    new ExperimentalUnitFragment { Key = ev.Key, Value = ev },
+                    Formatting.None,
+                    new JsonSerializerSettings { ReferenceResolver = this.batchConfig.ReferenceResolver });
+            }
+
+            this.eventSource = new TransformBlock<IEvent, string>(
+                serializer,
                 new ExecutionDataflowBlockOptions
                 {
                     MaxDegreeOfParallelism = Environment.ProcessorCount,
