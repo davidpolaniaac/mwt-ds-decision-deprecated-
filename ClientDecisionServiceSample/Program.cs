@@ -242,7 +242,7 @@ namespace ClientDecisionServiceSample
                 return vwFileName;
             }
 
-            string vwArgs = "--cb_adf --rank_all";
+            string vwArgs = "--cb_adf --rank_all --quiet";
 
             using (var vw = new VowpalWabbit<ADFContext, ADFFeatures>(vwArgs))
             {

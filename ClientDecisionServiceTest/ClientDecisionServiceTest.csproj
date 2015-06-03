@@ -70,11 +70,11 @@
     </Reference>
     <Reference Include="Microsoft.Research.MachineLearning.VowpalWabbit, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Research.VowpalWabbit.7.10.1.12\lib\net45\Microsoft.Research.MachineLearning.VowpalWabbit.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Research.VowpalWabbit.7.10.1.14\lib\net45\Microsoft.Research.MachineLearning.VowpalWabbit.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Research.MachineLearning.VowpalWabbitCore, Version=1.0.5629.17835, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="Microsoft.Research.MachineLearning.VowpalWabbitCore, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Research.VowpalWabbit.7.10.1.12\lib\net45\Microsoft.Research.MachineLearning.VowpalWabbitCore.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Research.VowpalWabbit.7.10.1.14\lib\net45\Microsoft.Research.MachineLearning.VowpalWabbitCore.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Configuration, Version=1.8.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
