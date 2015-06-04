@@ -15,6 +15,7 @@ namespace Microsoft.Research.DecisionService.Uploader
     /// </remarks>
     public sealed class CachingReferenceResolver : IReferenceResolver
     {
+        private readonly object objectLock = new object();
         private readonly Dictionary<object, CacheItem> references;
         private readonly int maxCapacity;
         private readonly TimeSpan maxAge;
@@ -80,18 +81,21 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// <returns>The reference to the object.</returns>
         public string GetReference(object context, object value)
         {
-            CacheItem item;
-            if (!this.references.TryGetValue(value, out item))
+            lock (this.objectLock)
             {
-                item = new CacheItem
+                CacheItem item;
+                if (!this.references.TryGetValue(value, out item))
                 {
-                    CreationDate = DateTime.UtcNow,
-                    ReferenceId = Guid.NewGuid().ToString()
-                };
-                this.references[value] = item;
-            }
+                    item = new CacheItem
+                    {
+                        CreationDate = DateTime.UtcNow,
+                        ReferenceId = Guid.NewGuid().ToString()
+                    };
+                    this.references[value] = item;
+                }
 
-            return item.ReferenceId;
+                return item.ReferenceId;
+            }
         }
 
         /// <summary>
@@ -104,31 +108,34 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// </returns>
         public bool IsReferenced(object context, object value)
         {
-            if (this.references.Count > this.maxCapacity)
+            lock (this.objectLock)
             {
-                // cleanup
-                var itemsToRemove = this.references.OrderBy(kvp => kvp.Value.CreationDate)
-                    .Take(this.references.Count - this.maxCapacity)
-                    .Select(kvp => kvp.Key)
-                    .ToList();
-
-                foreach (var key in itemsToRemove)
+                if (this.references.Count > this.maxCapacity)
                 {
-                    this.references.Remove(key);
+                    // cleanup
+                    var itemsToRemove = this.references.OrderBy(kvp => kvp.Value.CreationDate)
+                        .Take(this.references.Count - this.maxCapacity)
+                        .Select(kvp => kvp.Key)
+                        .ToList();
+
+                    foreach (var key in itemsToRemove)
+                    {
+                        this.references.Remove(key);
+                    }
                 }
-            }
 
-            CacheItem item;
-            if (!this.references.TryGetValue(value, out item))
-            {
-                return false;
-            }
+                CacheItem item;
+                if (!this.references.TryGetValue(value, out item))
+                {
+                    return false;
+                }
 
-            var now = DateTime.UtcNow;
-            if (this.maxAge != TimeSpan.MaxValue && item.CreationDate < DateTime.UtcNow - this.maxAge)
-            {
-                this.references.Remove(value);
-                return false;
+                var now = DateTime.UtcNow;
+                if (this.maxAge != TimeSpan.MaxValue && item.CreationDate < DateTime.UtcNow - this.maxAge)
+                {
+                    this.references.Remove(value);
+                    return false;
+                }
             }
 
             return true;
