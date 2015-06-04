@@ -33,14 +33,7 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// <param name="httpClient">Optional; The custom <see cref="IHttpClient"/> object to handle HTTP requests.</param>
         public EventUploader(BatchingConfiguration batchConfig = null, string loggingServiceBaseAddress = null, IHttpClient httpClient = null)
         {
-            this.batchConfig = batchConfig ?? new BatchingConfiguration()
-            {
-                MaxBufferSizeInBytes = 4 * 1024 * 1024,
-                MaxDuration = TimeSpan.FromMinutes(1),
-                MaxEventCount = 10000,
-                MaxUploadQueueCapacity = 100,
-                UploadRetryPolicy = BatchUploadRetryPolicy.ExponentialRetry
-            };
+            this.batchConfig = batchConfig ?? new BatchingConfiguration();
 
             this.loggingServiceBaseAddress = loggingServiceBaseAddress ?? Constants.ServiceAddress;
 
