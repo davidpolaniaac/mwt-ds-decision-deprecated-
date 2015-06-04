@@ -18,6 +18,7 @@ namespace Microsoft.Research.DecisionService.Uploader
             this.MaxEventCount = 10000;
             this.MaxUploadQueueCapacity = 100;
             this.UploadRetryPolicy = BatchUploadRetryPolicy.ExponentialRetry;
+            this.MaxDegreeOfSerializationParallelism = Environment.ProcessorCount;
         }
 
         /// <summary>
@@ -49,6 +50,11 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// Gets or sets the reference resolver to be used with JSON.NET.
         /// </summary>
         public IReferenceResolver ReferenceResolver { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maxium degree of parallelism employed when serializing events.
+        /// </summary>
+        public int MaxDegreeOfSerializationParallelism { get; set; }
     }
 
     /// <summary>

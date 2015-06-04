@@ -57,7 +57,7 @@ namespace Microsoft.Research.DecisionService.Uploader
                 serializer,
                 new ExecutionDataflowBlockOptions
                 {
-                    MaxDegreeOfParallelism = Environment.ProcessorCount,
+                    MaxDegreeOfParallelism = this.batchConfig.MaxDegreeOfSerializationParallelism,
                     BoundedCapacity = this.batchConfig.MaxUploadQueueCapacity
                 });
             this.eventObserver = this.eventSource.AsObserver();
