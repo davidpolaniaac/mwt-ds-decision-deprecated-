@@ -11,7 +11,10 @@ using System.Linq;
 
 namespace ClientDecisionServiceTest
 {
-    class TestContext { }
+    class TestContext 
+    {
+        public int A { get; set; }
+    }
 
     class TestADFContext : IActionDependentFeatureExample<string>
     {
@@ -132,7 +135,7 @@ namespace ClientDecisionServiceTest
             this.numReward++;
         }
 
-        public void ReportOutcome(string outcomeJson, string uniqueKey)
+        public void ReportOutcome(object outcome, string uniqueKey)
         {
             this.numOutcome++;
         }

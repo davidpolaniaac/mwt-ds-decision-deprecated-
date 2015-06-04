@@ -16,7 +16,7 @@ namespace Microsoft.Research.DecisionService.Uploader
             this.equalityComparer = equalityComparer;
         }
 
-        public bool Equals(object x, object y)
+        bool IEqualityComparer<object>.Equals(object x, object y)
         {
             if (x == null && y == null)
             {
@@ -30,11 +30,11 @@ namespace Microsoft.Research.DecisionService.Uploader
             {
                 return false;
             }
-               
+
             return this.equalityComparer.Equals(xt, yt);
         }
 
-        public int GetHashCode(object obj)
+        int IEqualityComparer<object>.GetHashCode(object obj)
         {
             var objt = obj as T;
             if (objt == null)

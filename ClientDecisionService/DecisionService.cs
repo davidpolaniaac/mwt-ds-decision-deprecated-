@@ -27,7 +27,6 @@ namespace ClientDecisionService
             {
                 this.recorder = config.Recorder ?? new JoinServiceLogger<TContext>(
                     config.JoinServiceBatchConfiguration,
-                    config.ContextJsonSerializer,
                     config.AuthorizationToken,
                     config.LoggingServiceAddress);
 
@@ -87,12 +86,12 @@ namespace ClientDecisionService
         /// <remarks>
         /// Outcomes are general forms of observations that can be converted to simple float rewards as required by some ML algorithms for optimization.
         /// </remarks>
-        public void ReportOutcome(string outcomeJson, string uniqueKey)
+        public void ReportOutcome(object outcome, string uniqueKey)
         {
             ILogger<TContext> logger = this.recorder as ILogger<TContext>;
             if (logger != null)
             {
-                logger.ReportOutcome(outcomeJson, uniqueKey);
+                logger.ReportOutcome(outcome, uniqueKey);
             }
         }
 

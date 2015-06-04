@@ -303,8 +303,6 @@ namespace ClientDecisionServiceSample
                 },
                 PollingForModelPeriod = TimeSpan.MinValue,
                 PollingForSettingsPeriod = TimeSpan.MinValue,
-                // Features must be top-level, no nesting supported
-                ContextJsonSerializer = uc => JsonConvert.SerializeObject(uc.FeatureVector)
             };
 
             var service = new DecisionService<UserContext>(serviceConfig);

@@ -7,13 +7,11 @@ namespace ClientDecisionService
     internal class JoinServiceLogger<TContext> : ILogger<TContext>, IDisposable
     {
         public JoinServiceLogger(BatchingConfiguration batchConfig, 
-            Func<TContext, string> contextSerializer, 
             string authorizationToken,
             string loggingServiceBaseAddress)
         {
             this.eventUploader = new EventUploader(batchConfig, loggingServiceBaseAddress);
             this.eventUploader.InitializeWithToken(authorizationToken);
-            this.contextSerializer = contextSerializer ?? (x => x == null ? null : JsonConvert.SerializeObject(x));
         }
 
         public void Record(TContext context, uint[] actions, float probability, string uniqueKey)
@@ -23,7 +21,7 @@ namespace ClientDecisionService
                 Key = uniqueKey,
                 Actions = actions,
                 Probability = probability,
-                Context = this.contextSerializer(context)
+                Context = context
             });
         }
 
@@ -32,16 +30,16 @@ namespace ClientDecisionService
             this.eventUploader.Upload(new Observation
             {
                 Key = uniqueKey,
-                Value = JsonConvert.SerializeObject(new { Reward = reward })
+                Value = new { Reward = reward }
             });
         }
 
-        public void ReportOutcome(string outcomeJson, string uniqueKey)
+        public void ReportOutcome(object outcome, string uniqueKey)
         {
             this.eventUploader.Upload(new Observation
             {
                 Key = uniqueKey,
-                Value = outcomeJson
+                Value = outcome
             });
         }
 
@@ -70,7 +68,6 @@ namespace ClientDecisionService
 
         #region Members
         private EventUploader eventUploader;
-        private readonly Func<TContext, string> contextSerializer;
         #endregion
     }
 }

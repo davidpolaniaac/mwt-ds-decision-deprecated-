@@ -8,6 +8,8 @@ namespace ClientDecisionService
 {
     internal static class DecisionServiceConstants
     {
+        // Use for test cases: "http://127.0.0.1:10000/devstoreaccount1/app-locations/{0}";
+        // Also a call Louie is helpful :)
         internal static readonly string RedirectionBlobLocation = "http://decisionservicestorage.blob.core.windows.net/app-locations/{0}";
 
         internal static readonly string ApplicationBlobLocationContainerName = "app-locations";

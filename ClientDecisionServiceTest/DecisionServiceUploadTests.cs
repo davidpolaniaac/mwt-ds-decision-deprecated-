@@ -59,7 +59,7 @@ namespace ClientDecisionServiceTest
             uint[] chosenAction1 = ds.ChooseAction(uniqueKey, new TestContext());
             uint[] chosenAction2 = ds.ChooseAction(uniqueKey, new TestContext());
             ds.ReportReward(1.0f, uniqueKey);
-            ds.ReportOutcome(JsonConvert.SerializeObject(new { value = "test outcome" }), uniqueKey);
+            ds.ReportOutcome(new { value = "test outcome" }, uniqueKey);
 
             ds.Flush();
 
@@ -90,7 +90,7 @@ namespace ClientDecisionServiceTest
             Parallel.For(0, numEvents, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount * 2 }, (i) =>
             {
                 chosenActions.Add(ds.ChooseAction(uniqueKey, new TestContext()));
-                ds.ReportOutcome(JsonConvert.SerializeObject(new { value = createObservation(i) }), uniqueKey);
+                ds.ReportOutcome(new { value = createObservation(i) }, uniqueKey);
             });
 
             ds.Flush();

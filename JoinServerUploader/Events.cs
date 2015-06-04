@@ -75,8 +75,7 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// Gets or sets the context structure with relevant information for the current interaction.
         /// </summary>
         [JsonProperty(PropertyName = "c", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonConverter(typeof(RawStringConverter))]
-        public string Context { get; set; }
+        public object Context { get; set; }
     }
 
     /// <summary>
@@ -154,8 +153,7 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// or more generic structure which can be later used for reward metric analysis.
         /// </remarks>
         [JsonProperty(PropertyName = "v", NullValueHandling = NullValueHandling.Ignore)]
-        [JsonConverter(typeof(RawStringConverter))]
-        public string Value { get; set; }
+        public object Value { get; set; }
     }
 
     /// <summary>

@@ -88,20 +88,6 @@ namespace ClientDecisionService
             } 
         }
         
-        // TODO: is this needed for v1?
-        /// <summary>
-        /// A custom serializer for the context.
-        /// </summary>
-        public Func<TContext, string> ContextJsonSerializer 
-        {
-            get { return contextJsonSerializer; }
-            set 
-            { 
-                if (value == null) throw new ArgumentNullException("Custom JSON serializer cannot be null");
-                contextJsonSerializer = value;
-            } 
-        }
-        
         /// <summary>
         /// Specifies the address for a custom HTTP logging service.
         /// </summary>
@@ -156,7 +142,6 @@ namespace ClientDecisionService
         private IRecorder<TContext> recorder;
         private string blobOutputDir;
         private BatchingConfiguration batchConfig;
-        private Func<TContext, string> contextJsonSerializer;
         private string loggingServiceAddress;
         private TimeSpan pollingForSettingsPeriod;
         private TimeSpan pollingForModelPeriod;
