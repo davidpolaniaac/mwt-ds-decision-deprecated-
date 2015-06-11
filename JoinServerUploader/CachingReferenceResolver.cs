@@ -16,7 +16,8 @@ namespace Microsoft.Research.DecisionService.Uploader
     public sealed class CachingReferenceResolver : IReferenceResolver
     {
         private readonly object objectLock = new object();
-        private readonly Dictionary<object, CacheItem> references;
+        private readonly Dictionary<object, string> references;
+        private readonly Queue<CacheItem> evictionQueue;
         private readonly int maxCapacity;
         private readonly TimeSpan maxAge;
 
@@ -68,7 +69,8 @@ namespace Microsoft.Research.DecisionService.Uploader
                 equalityComparer = new ReferenceEqualityComparer();
             }
 
-            this.references = new Dictionary<object, CacheItem>(equalityComparer);
+            this.references = new Dictionary<object, string>(equalityComparer);
+            this.evictionQueue = new Queue<CacheItem>();
             this.maxCapacity = maxCapacity;
             this.maxAge = maxAge;
         }
@@ -83,18 +85,19 @@ namespace Microsoft.Research.DecisionService.Uploader
         {
             lock (this.objectLock)
             {
-                CacheItem item;
-                if (!this.references.TryGetValue(value, out item))
+                string reference;
+                if (!this.references.TryGetValue(value, out reference))
                 {
-                    item = new CacheItem
+                    reference = Guid.NewGuid().ToString();
+                    this.references[value] = reference;
+                    this.evictionQueue.Enqueue(new CacheItem
                     {
                         CreationDate = DateTime.UtcNow,
-                        ReferenceId = Guid.NewGuid().ToString()
-                    };
-                    this.references[value] = item;
+                        Key = value
+                    });
                 }
 
-                return item.ReferenceId;
+                return reference;
             }
         }
 
@@ -110,35 +113,24 @@ namespace Microsoft.Research.DecisionService.Uploader
         {
             lock (this.objectLock)
             {
-                if (this.references.Count > this.maxCapacity)
+                while (this.references.Count > this.maxCapacity)
                 {
                     // cleanup
-                    var itemsToRemove = this.references.OrderBy(kvp => kvp.Value.CreationDate)
-                        .Take(this.references.Count - this.maxCapacity)
-                        .Select(kvp => kvp.Key)
-                        .ToList();
+                    var itemToRemove = this.evictionQueue.Dequeue();
+                    this.references.Remove(itemToRemove.Key);
+                }
 
-                    foreach (var key in itemsToRemove)
+                if (this.maxAge != TimeSpan.MaxValue)
+                {
+                    var now = DateTime.UtcNow;
+                    while (this.evictionQueue.Count > 0 && this.evictionQueue.Peek().CreationDate < now - this.maxAge)
                     {
-                        this.references.Remove(key);
+                        this.references.Remove(this.evictionQueue.Dequeue().Key);
                     }
                 }
 
-                CacheItem item;
-                if (!this.references.TryGetValue(value, out item))
-                {
-                    return false;
-                }
-
-                var now = DateTime.UtcNow;
-                if (this.maxAge != TimeSpan.MaxValue && item.CreationDate < DateTime.UtcNow - this.maxAge)
-                {
-                    this.references.Remove(value);
-                    return false;
-                }
+                return this.references.ContainsKey(value);
             }
-
-            return true;
         }
 
         /// <summary>
@@ -172,7 +164,7 @@ namespace Microsoft.Research.DecisionService.Uploader
         {
             internal DateTime CreationDate { get; set; }
 
-            internal string ReferenceId { get; set; }
+            internal object Key { get; set; }
         }
         
         /// <summary>

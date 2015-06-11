@@ -283,7 +283,8 @@ namespace ClientDecisionServiceTest
     public class Data
     {
         public string Name { get; set; }
-
+        
+        // [JsonObject(ItemIsReference=true)]
         public List<Sub> Subs { get; set; }
     }
 
