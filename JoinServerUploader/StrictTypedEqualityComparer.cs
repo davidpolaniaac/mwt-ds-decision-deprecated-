@@ -6,11 +6,19 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Research.DecisionService.Uploader
 {
+    /// <summary>
+    /// An equality comparer with type checking.
+    /// </summary>
+    /// <typeparam name="T">The type of the object to compare.</typeparam>
     public class StrictTypedEqualityComparer<T> : IEqualityComparer<object>
         where T : class
     {
         private IEqualityComparer<T> equalityComparer;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="equalityComparer">The comparer instance.</param>
         public StrictTypedEqualityComparer(IEqualityComparer<T> equalityComparer)
         {
             this.equalityComparer = equalityComparer;

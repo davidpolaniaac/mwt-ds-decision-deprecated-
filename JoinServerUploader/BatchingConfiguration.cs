@@ -11,6 +11,9 @@ namespace Microsoft.Research.DecisionService.Uploader
     /// </remarks>
     public class BatchingConfiguration
     {
+        /// <summary>
+        /// Constructor with default configuration values set.
+        /// </summary>
         public BatchingConfiguration()
         {
             this.MaxBufferSizeInBytes = 4 * 1024 * 1024;
