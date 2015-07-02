@@ -1,11 +1,11 @@
 ﻿using Microsoft.Research.DecisionService.Common;
-using Microsoft.Research.MachineLearning;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Text;
+using VW;
 
 namespace ClientDecisionServiceTest
 {

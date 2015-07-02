@@ -1,7 +1,5 @@
 ﻿using ClientDecisionService;
 using Microsoft.Research.DecisionService.Uploader;
-using Microsoft.Research.MachineLearning;
-using Microsoft.Research.MachineLearning.Interfaces;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using MultiWorldTesting;
@@ -16,8 +14,10 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using Microsoft.Research.MachineLearning.Labels;
-using Microsoft.Research.MachineLearning.Serializer.Attributes;
+using VW;
+using VW.Interfaces;
+using VW.Labels;
+using VW.Serializer.Attributes;
 
 namespace ClientDecisionServiceSample
 {

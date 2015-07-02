@@ -1,5 +1,5 @@
-﻿using Microsoft.Research.MachineLearning;
-using Microsoft.Research.MachineLearning.Interfaces;
+﻿using VW;
+using VW.Interfaces;
 using MultiWorldTesting;
 using System;
 using System.Diagnostics;

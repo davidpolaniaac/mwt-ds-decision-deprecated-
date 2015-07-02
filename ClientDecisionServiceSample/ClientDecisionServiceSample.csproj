@@ -71,14 +71,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EnterpriseLibrary.TransientFaultHandling.6.0.1304.0\lib\portable-net45+win+wp8\Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Research.MachineLearning.VowpalWabbit, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Research.VowpalWabbit.7.10.1.14\lib\net45\Microsoft.Research.MachineLearning.VowpalWabbit.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Research.MachineLearning.VowpalWabbitCore, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Research.VowpalWabbit.7.10.1.14\lib\net45\Microsoft.Research.MachineLearning.VowpalWabbitCore.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.WindowsAzure.Configuration">
       <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.1.8.0.0\lib\net35-full\Microsoft.WindowsAzure.Configuration.dll</HintPath>
     </Reference>
@@ -116,6 +108,14 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="VowpalWabbit, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\VowpalWabbit.8.0.0.6\lib\net45\VowpalWabbit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="VowpalWabbitCore, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\VowpalWabbit.8.0.0.6\lib\net45\VowpalWabbitCore.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />

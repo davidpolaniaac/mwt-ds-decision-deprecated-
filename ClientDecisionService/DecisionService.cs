@@ -1,12 +1,11 @@
 ﻿using Microsoft.Research.DecisionService.Common;
-using Microsoft.Research.MachineLearning;
-using Microsoft.Research.MachineLearning.Interfaces;
 using MultiWorldTesting;
 using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using VW.Interfaces;
 
 namespace ClientDecisionService
 {
