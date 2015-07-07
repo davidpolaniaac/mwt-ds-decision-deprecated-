@@ -104,7 +104,6 @@ namespace ClientDecisionService
                             switch (result.HttpStatusCode)
                             {
                                 case (int)HttpStatusCode.NotFound:
-                                    Trace.TraceWarning("Did not find a blob for {0}", this.blobName);
                                     logErrors = false;
                                     break;
                                 case (int)HttpStatusCode.NotModified:
