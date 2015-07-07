@@ -97,7 +97,7 @@ namespace ClientDecisionService
                 return false;
             }
 
-            var factory = new VowpalWabbitFactory<TContext, TActionDependentFeature>(vwModel);
+            var factory = new VowpalWabbitFactory<TContext, TActionDependentFeature>(vwModel, new VW.Serializer.VowpalWabbitSerializerSettings { MaxExampleCacheSize = 1024 });
 
             if (this.vwPool == null)
             {
