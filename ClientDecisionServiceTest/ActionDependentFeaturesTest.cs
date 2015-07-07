@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MultiWorldTesting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace ClientDecisionServiceTest
@@ -49,7 +50,7 @@ namespace ClientDecisionServiceTest
         }
 
         [TestMethod]
-        public void TestADFModelUpdate()
+        public void TestADFModelUpdateFromFile()
         {
             joinServer.Reset();
 
@@ -110,6 +111,63 @@ namespace ClientDecisionServiceTest
             {
                 System.IO.File.Delete(actualModelFile);
             }
+        }
+
+        [TestMethod]
+        public void TestADFModelUpdateFromStream()
+        {
+            joinServer.Reset();
+
+            var dsConfig = new DecisionServiceConfiguration<TestADFContextWithFeatures>(
+                authorizationToken: MockCommandCenter.AuthorizationToken,
+                explorer: new EpsilonGreedyExplorer<TestADFContextWithFeatures>(new TestADFWithFeaturesPolicy(), epsilon: 0.5f))
+            {
+                LoggingServiceAddress = MockJoinServer.MockJoinServerAddress,
+                PollingForModelPeriod = TimeSpan.MinValue,
+                PollingForSettingsPeriod = TimeSpan.MinValue
+            };
+
+            var ds = new DecisionService<TestADFContextWithFeatures>(dsConfig);
+
+            string uniqueKey = "eventid";
+
+            string modelFile = "test_vw_adf{0}.model";
+
+            for (int i = 1; i <= 100; i++)
+            {
+                Random rg = new Random(i);
+
+                if (i % 50 == 1)
+                {
+                    int modelIndex = i / 50;
+                    string currentModelFile = string.Format(modelFile, modelIndex);
+
+                    byte[] modelContent = commandCenter.GetModelBlobContent(numExamples: 3 + modelIndex, numFeatureVectors: 4 + modelIndex);
+
+                    var modelStream = new MemoryStream(modelContent);
+
+                    ds.UpdatePolicy(new VWPolicy<TestADFContextWithFeatures, TestADFFeatures>(modelStream));
+                }
+
+                int numActions = rg.Next(5, 20);
+                var context = TestADFContextWithFeatures.CreateRandom(numActions, rg);
+
+                uint[] action = ds.ChooseAction(uniqueKey, context);
+
+                Assert.AreEqual(numActions, action.Length);
+
+                // verify all unique actions in the list
+                Assert.AreEqual(action.Length, action.Distinct().Count());
+
+                // verify the actions are in the expected range
+                Assert.AreEqual((numActions * (numActions + 1)) / 2, action.Sum(a => a));
+
+                ds.ReportReward(i / 100f, uniqueKey);
+            }
+
+            ds.Flush();
+
+            Assert.AreEqual(200, joinServer.EventBatchList.Sum(b => b.ExperimentalUnitFragments.Count));
         }
 
         [TestInitialize]

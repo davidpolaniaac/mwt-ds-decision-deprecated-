@@ -121,6 +121,7 @@ namespace ClientDecisionServiceTest
         [TestMethod]
         public void TestOnlineModeInvalidToken()
         {
+            /*** This test requires real value of RedirectionBlobLocation set in DecisionServiceConstants.cs file ***/
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: MockCommandCenter.AuthorizationToken,
                 explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));

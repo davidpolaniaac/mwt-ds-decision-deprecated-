@@ -207,6 +207,10 @@ namespace ClientDecisionServiceSample
 
                     vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(vwModelFile);
 
+                    // Alternatively, VWPolicy can also be loaded from an IO stream:
+                    // var vwModelStream = new MemoryStream(File.ReadAllBytes(vwModelFile));
+                    // vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(vwModelStream);
+
                     // Manually updates decision service with a new policy for consuming VW models.
                     service.UpdatePolicy(vwPolicy);
                 }

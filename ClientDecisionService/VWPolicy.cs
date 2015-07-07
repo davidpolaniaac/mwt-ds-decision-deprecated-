@@ -4,6 +4,7 @@ using MultiWorldTesting;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.IO;
 
 namespace ClientDecisionService
 {
@@ -32,6 +33,15 @@ namespace ClientDecisionService
         }
 
         /// <summary>
+        /// Constructor using a memory stream.
+        /// </summary>
+        /// <param name="vwModelStream">The VW model memory stream.</param>
+        public VWPolicy(Stream vwModelStream)
+        {
+            this.ModelUpdate(vwModelStream);
+        }
+
+        /// <summary>
         /// Scores the model against the specified context and returns a list of actions (1-based index).
         /// </summary>
         /// <param name="context">The context object.</param>
@@ -54,18 +64,34 @@ namespace ClientDecisionService
         /// <returns>true if the update was successful; otherwise, false.</returns>
         public bool ModelUpdate(string modelFile)
         {
+            return ModelUpdate(() => { return new VowpalWabbitModel(string.Format("--quiet -t -i {0}", modelFile)); });
+        }
+
+        /// <summary>
+        /// Update VW model from stream.
+        /// </summary>
+        /// <param name="modelStream">The model stream to load from.</param>
+        /// <returns>true if the update was successful; otherwise, false.</returns>
+        public bool ModelUpdate(Stream modelStream)
+        {
+            return ModelUpdate(() => { return new VowpalWabbitModel("--quiet -t", modelStream); });
+        }
+
+        /// <summary>
+        /// Update VW model using a generic method which loads the model.
+        /// </summary>
+        /// <param name="loadModelFunc">The generic method to load the model.</param>
+        /// <returns>true if the update was successful; otherwise, false.</returns>
+        public bool ModelUpdate(Func<VowpalWabbitModel> loadModelFunc)
+        {
             VowpalWabbitModel vwModel = null;
             try
             {
-                // TODO: what if path to model contains spaces?
-                string vwArgs = string.Format("--quiet -t -i {0}", modelFile);
-                // TODO: add Dispose to ObjectPool using reference couting to dispose the shared model correctly.
-                // otherwise this is wasting memory as the shared model is never freed.
-                vwModel = new VowpalWabbitModel(vwArgs);
+                vwModel = loadModelFunc();
             }
             catch (Exception ex)
             {
-                Trace.TraceError("Unable to initialize VW from file: {0}", modelFile);
+                Trace.TraceError("Unable to initialize VW.");
                 Trace.TraceError(ex.ToString());
 
                 return false;
