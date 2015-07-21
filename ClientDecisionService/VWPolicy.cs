@@ -15,6 +15,7 @@ namespace ClientDecisionService
     /// <typeparam name="TContext">The type of the context.</typeparam>
     public class VWPolicy<TContext, TActionDependentFeature> : IPolicy<TContext>, IDisposable
         where TContext : SharedExample, IActionDependentFeatureExample<TActionDependentFeature>
+        where TActionDependentFeature : IExample
     {
         /// <summary>
         /// Constructor using an optional model file.
@@ -24,7 +25,7 @@ namespace ClientDecisionService
         {
             if (vwModelFile == null)
             {
-                this.vwPool = new ObjectPool<VowpalWabbit<TContext, TActionDependentFeature>>(null);
+                this.vwPool = new ObjectPool<VowpalWabbitPredictor<TContext, TActionDependentFeature>>(null);
             }
             else
             {
@@ -97,11 +98,11 @@ namespace ClientDecisionService
                 return false;
             }
 
-            var factory = new VowpalWabbitFactory<TContext, TActionDependentFeature>(vwModel, new VW.Serializer.VowpalWabbitSerializerSettings { MaxExampleCacheSize = 1024 });
+            var factory = new VowpalWabbitPredictorFactory<TContext, TActionDependentFeature>(vwModel, new VW.Serializer.VowpalWabbitSerializerSettings { MaxExampleCacheSize = 1024 });
 
             if (this.vwPool == null)
             {
-                this.vwPool = new ObjectPool<VowpalWabbit<TContext, TActionDependentFeature>>(factory);
+                this.vwPool = new ObjectPool<VowpalWabbitPredictor<TContext, TActionDependentFeature>>(factory);
             }
             else
             {
@@ -136,6 +137,6 @@ namespace ClientDecisionService
             }
         }
 
-        private ObjectPool<VowpalWabbit<TContext, TActionDependentFeature>> vwPool;
+        private ObjectPool<VowpalWabbitPredictor<TContext, TActionDependentFeature>> vwPool;
     }
 }
