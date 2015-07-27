@@ -1,5 +1,4 @@
 ﻿using MultiWorldTesting;
-using MultiWorldTesting.SingleAction;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,37 +7,29 @@ namespace TestCommon
 {
     public class TestPolicy<TContext> : IPolicy<TContext>
     {
-        public TestPolicy() : this(-1) { }
+        public TestPolicy(uint numberOfActions) : this(numberOfActions, -1) { }
 
-        public TestPolicy(int index)
+        public TestPolicy(uint numberOfActions, int index)
         {
+            this.numberOfActions = numberOfActions;
             this.index = index;
             this.ActionToChoose = uint.MaxValue;
         }
 
-        public uint ChooseAction(TContext context)
+        public uint[] ChooseAction(TContext context)
         {
-            return (this.ActionToChoose != uint.MaxValue) ? this.ActionToChoose : 5;
+            uint[] actions = new uint[numberOfActions];
+            for (int i = 0; i < actions.Length; i++)
+            {
+                actions[i] = (uint)(i + 1);
+            }
+            actions[0] = (this.ActionToChoose != uint.MaxValue) ? this.ActionToChoose : 5;
+            return actions;
         }
 
         public uint ActionToChoose { get; set; }
         private int index;
-    }
-
-    public class TestSimplePolicy : IPolicy<SimpleContext>
-    {
-        public uint ChooseAction(SimpleContext context)
-        {
-            return 1;
-        }
-    }
-
-    public class StringPolicy : IPolicy<SimpleContext>
-    {
-        public uint ChooseAction(SimpleContext context)
-        {
-            return 1;
-        }
+        private uint numberOfActions;
     }
 
     public class TestScorer<Ctx> : IScorer<Ctx>

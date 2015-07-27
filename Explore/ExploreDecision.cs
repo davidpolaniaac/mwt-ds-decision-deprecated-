@@ -18,23 +18,7 @@ namespace MultiWorldTesting.Core
     }
 }
 
-namespace MultiWorldTesting.SingleAction
-{
-    using MultiWorldTesting.Core;
-
-    /// <summary>
-    /// Exploration result 
-    /// </summary>
-    public class DecisionTuple : BaseDecisionTuple
-    {
-        /// <summary>
-        /// Action chosen by exploration.
-        /// </summary>
-        public uint Action { get; set; }
-    }
-}
-
-namespace MultiWorldTesting.MultiAction
+namespace MultiWorldTesting
 {
     using MultiWorldTesting.Core;
 

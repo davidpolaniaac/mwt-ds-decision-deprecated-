@@ -2,11 +2,10 @@
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MultiWorldTesting;
-using MultiWorldTesting.MultiAction;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ExploreTests.MultiAction
+namespace ExploreTests
 {
     [TestClass]
     public class MWTExploreTests

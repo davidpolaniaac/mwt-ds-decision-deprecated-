@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
 
-namespace MultiWorldTesting.SingleAction
+namespace MultiWorldTesting
 {
     /// <summary>
 	/// A sample recorder class that converts the exploration tuple into string format.
@@ -25,9 +25,9 @@ namespace MultiWorldTesting.SingleAction
         /// <param name="action">Chosen by an exploration algorithm given context.</param>
         /// <param name="probability">The probability of the chosen action given context.</param>
         /// <param name="uniqueKey">A user-defined identifer for the decision.</param>
-        public void Record(TContext context, uint action, float probability, string uniqueKey)
+        public void Record(TContext context, uint[] actions, float probability, string uniqueKey)
         {
-            recordingBuilder.Append(action.ToString(CultureInfo.InvariantCulture));
+            recordingBuilder.Append(actions[0].ToString(CultureInfo.InvariantCulture));
             recordingBuilder.Append(' ');
             recordingBuilder.Append(uniqueKey);
             recordingBuilder.Append(' ');

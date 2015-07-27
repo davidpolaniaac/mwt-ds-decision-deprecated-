@@ -50,17 +50,12 @@
   </Choose>
   <ItemGroup>
     <Compile Include="MultiActionTest.cs" />
-    <Compile Include="MWTExploreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Explore\Explore.csproj">
       <Project>{6d245816-6016-49b6-9e37-a0bf0d2a736a}</Project>
       <Name>Explore</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Common\TestCommon.csproj">
-      <Project>{56d4d5d8-3677-420a-864b-1c9ab9f6480f}</Project>
-      <Name>TestCommon</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

@@ -1,5 +1,4 @@
 ﻿using MultiWorldTesting;
-using MultiWorldTesting.SingleAction;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -306,7 +305,7 @@ namespace BlackBoxTests
                 {
                     var policyAction = configPolicy["Action"].Value<uint>();
 
-                    var policy = new TestPolicy<TContext> { ActionToChoose = policyAction };
+                    var policy = new TestPolicy<TContext>(numActions) { ActionToChoose = policyAction };
 
                     var explorer = isVariableActionContext ?
                         new EpsilonGreedyExplorer<TContext>(policy, epsilon) :
@@ -348,7 +347,7 @@ namespace BlackBoxTests
                 {
                     var policyAction = configPolicy["Action"].Value<uint>();
 
-                    var policy = new TestPolicy<TContext> { ActionToChoose = policyAction };
+                    var policy = new TestPolicy<TContext>(numActions) { ActionToChoose = policyAction };
 
                     var explorer = isVariableActionContext ?
                         new TauFirstExplorer<TContext>(policy, tau) :
@@ -513,7 +512,7 @@ namespace BlackBoxTests
                     case 0: // fixed policy
                     {
                         var policyAction = configPolicy["Action"].Value<uint>();
-                        policies.Add(new TestPolicy<TContext> { ActionToChoose = policyAction });
+                        policies.Add(new TestPolicy<TContext>(numActions) { ActionToChoose = policyAction });
                         break;
                     }
                 }
