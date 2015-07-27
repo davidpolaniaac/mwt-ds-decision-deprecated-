@@ -51,9 +51,9 @@ namespace MultiWorldTesting
             this.explore = explore;
         }
 
-        public DecisionTuple ChooseAction(ulong saltedSeed, TContext context)
+        public DecisionTuple ChooseAction(ulong saltedSeed, TContext context, Func<TContext, uint> getNumberOfActionsFunc)
         {
-            uint numActions = VariableActionHelper.GetNumberOfActions(context, this.numActions);
+            uint numActions = VariableActionHelper.GetNumberOfActions(getNumberOfActionsFunc, context, this.numActions);
 
             var random = new PRG(saltedSeed);
 

@@ -77,11 +77,12 @@ namespace MultiWorldTesting
         /// </summary>
         /// <param name="saltedSeed">A PRG seed based on a unique id information provided by the user.</param>
         /// <param name="context">A user-defined context for the decision.</param>
+        /// <param name="getNumberOfActionsFunc">The func delegate to retrieve number of actions in a given context.</param>
         /// <returns>
         /// A <see cref="DecisionTuple"/> object including the action to take, the probability it was chosen, 
         /// and a flag indicating whether to record this decision.
         /// </returns>
-        DecisionTuple ChooseAction(ulong saltedSeed, TContext context);
+        DecisionTuple ChooseAction(ulong saltedSeed, TContext context, Func<TContext, uint> getNumberOfActionsFunc);
 
         void EnableExplore(bool explore);
     };

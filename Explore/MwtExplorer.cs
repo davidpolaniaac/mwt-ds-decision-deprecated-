@@ -11,6 +11,7 @@ namespace MultiWorldTesting
     {
         private ulong appId;
         private IRecorder<TContext> recorder;
+        private Func<TContext, uint> getNumberOfActionsFunc;
 
         /// <summary>
         /// Constructor.
@@ -21,6 +22,20 @@ namespace MultiWorldTesting
         {
             this.appId = MurMurHash3.ComputeIdHash(appId);
             this.recorder = recorder;
+            this.getNumberOfActionsFunc = null;
+        }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="appId">This should be unique to each experiment to avoid correlation bugs.</param>
+        /// <param name="recorder">A user-specified class for recording the appropriate bits for use in evaluation and learning.</param>
+        /// <param name="getNumberOfActionsFunc">The func delegate to retrieve number of actions in a given context.</param>
+        public MwtExplorer(string appId, IRecorder<TContext> recorder, Func<TContext, uint> getNumberOfActionsFunc)
+        {
+            this.appId = MurMurHash3.ComputeIdHash(appId);
+            this.recorder = recorder;
+            this.getNumberOfActionsFunc = getNumberOfActionsFunc;
         }
 
         /// <summary>
@@ -34,7 +49,7 @@ namespace MultiWorldTesting
         {
             ulong seed = MurMurHash3.ComputeIdHash(uniqueKey);
 
-            DecisionTuple decisionTuple = explorer.ChooseAction(seed + this.appId, context);
+            DecisionTuple decisionTuple = explorer.ChooseAction(seed + this.appId, context, this.getNumberOfActionsFunc);
 
             if (decisionTuple.ShouldRecord)
             {
