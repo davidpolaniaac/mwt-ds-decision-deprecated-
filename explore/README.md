@@ -1,4 +1,0 @@
-explore
-=======
-
-Exploration library
