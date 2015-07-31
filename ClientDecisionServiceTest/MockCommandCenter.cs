@@ -1,9 +1,11 @@
-﻿using Microsoft.Research.DecisionService.Common;
+﻿using ClientDecisionService;
+using Microsoft.Research.DecisionService.Common;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using VW;
 
@@ -14,6 +16,23 @@ namespace ClientDecisionServiceTest
         public MockCommandCenter(string token)
         {
             this.token = token;
+            SetRedirectionBlobLocation();
+        }
+
+        public static void SetRedirectionBlobLocation()
+        {
+            Assembly assembly = typeof(DecisionService<int>).Assembly;
+            Type dsct = assembly.GetType("ClientDecisionService.DecisionServiceConstants");
+            FieldInfo rblf = dsct.GetField("RedirectionBlobLocation", BindingFlags.NonPublic | BindingFlags.Static);
+            rblf.SetValue(null, MockCommandCenter.RedictionBlobLocation);
+        }
+
+        public static void UnsetRedirectionBlobLocation()
+        {
+            Assembly assembly = typeof(DecisionService<int>).Assembly;
+            Type dsct = assembly.GetType("ClientDecisionService.DecisionServiceConstants");
+            FieldInfo rblf = dsct.GetField("RedirectionBlobLocation", BindingFlags.NonPublic | BindingFlags.Static);
+            rblf.SetValue(null, "http://decisionservicestorage.blob.core.windows.net/app-locations/{0}");
         }
 
         public void CreateBlobs(bool createSettingsBlob, bool createModelBlob, int modelId = 1)
@@ -134,5 +153,7 @@ namespace ClientDecisionServiceTest
 
         public static readonly string StorageConnectionString = "UseDevelopmentStorage=true";
         public static readonly string AuthorizationToken = "test token";
+
+        public static readonly string RedictionBlobLocation = "http://127.0.0.1:10000/devstoreaccount1/app-locations/{0}";
     }
 }
