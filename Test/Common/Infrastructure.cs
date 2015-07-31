@@ -23,7 +23,14 @@ namespace TestCommon
             {
                 actions[i] = (uint)(i + 1);
             }
-            actions[0] = (this.ActionToChoose != uint.MaxValue) ? this.ActionToChoose : 5;
+
+            uint topActionToChoose = (this.ActionToChoose != uint.MaxValue) ? this.ActionToChoose : 5;
+            
+            // swap action to choose with top one
+            uint topAction = actions[0];
+            actions[0] = actions[topActionToChoose - 1];
+            actions[topActionToChoose - 1] = topAction;
+
             return actions;
         }
 

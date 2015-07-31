@@ -295,9 +295,12 @@ namespace BlackBoxTests
             where TContext : IStringContext
         {
             var recorder = new StringRecorder<TContext>();
-            var mwt = new MwtExplorer<TContext>(appId, recorder);
 
             bool isVariableActionContext = typeof(IVariableActionContext).IsAssignableFrom(typeof(TContext));
+
+            var mwt = isVariableActionContext ?
+                new MwtExplorer<TContext>(appId, recorder, Program.GetNumActions) :
+                new MwtExplorer<TContext>(appId, recorder);
 
             switch (policyType)
             {
@@ -337,9 +340,12 @@ namespace BlackBoxTests
             where TContext : IStringContext
         {
             var recorder = new StringRecorder<TContext>();
-            var mwt = new MwtExplorer<TContext>(appId, recorder);
 
             bool isVariableActionContext = typeof(IVariableActionContext).IsAssignableFrom(typeof(TContext));
+
+            var mwt = isVariableActionContext ?
+                new MwtExplorer<TContext>(appId, recorder, Program.GetNumActions) :
+                new MwtExplorer<TContext>(appId, recorder);
 
             switch (policyType)
             {
@@ -379,9 +385,12 @@ namespace BlackBoxTests
             where TContext : IStringContext
         {
             var recorder = new StringRecorder<TContext>();
-            var mwt = new MwtExplorer<TContext>(appId, recorder);
 
             bool isVariableActionContext = typeof(IVariableActionContext).IsAssignableFrom(typeof(TContext));
+
+            var mwt = isVariableActionContext ?
+                new MwtExplorer<TContext>(appId, recorder, Program.GetNumActions) :
+                new MwtExplorer<TContext>(appId, recorder);
 
             switch (policyType)
             {
@@ -439,9 +448,12 @@ namespace BlackBoxTests
         where TContext : IStringContext
         {
             var recorder = new StringRecorder<TContext>();
-            var mwt = new MwtExplorer<TContext>(appId, recorder);
 
             bool isVariableActionContext = typeof(IVariableActionContext).IsAssignableFrom(typeof(TContext));
+
+            var mwt = isVariableActionContext ?
+                new MwtExplorer<TContext>(appId, recorder, Program.GetNumActions) :
+                new MwtExplorer<TContext>(appId, recorder);
 
             switch (policyType)
             {
@@ -498,9 +510,12 @@ namespace BlackBoxTests
             where TContext : IStringContext
         {
             var recorder = new StringRecorder<TContext>();
-            var mwt = new MwtExplorer<TContext>(appId, recorder);
 
             bool isVariableActionContext = typeof(IVariableActionContext).IsAssignableFrom(typeof(TContext));
+
+            var mwt = isVariableActionContext ?
+                new MwtExplorer<TContext>(appId, recorder, Program.GetNumActions) :
+                new MwtExplorer<TContext>(appId, recorder);
 
             var policies = new List<IPolicy<TContext>>();
 
@@ -528,6 +543,11 @@ namespace BlackBoxTests
             }
 
             File.AppendAllText(outputFile, recorder.GetRecording());
+        }
+
+        static uint GetNumActions<TContext>(TContext context)
+        {
+            return ((IVariableActionContext)context).GetNumberOfActions();
         }
     }
 }
