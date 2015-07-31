@@ -45,9 +45,7 @@ namespace MultiWorldTesting
         /// <param name="defaultPolicies">A set of default policies to be uniform random over.</param>
         public BootstrapExplorer(IPolicy<TContext>[] defaultPolicies) :
             this(defaultPolicies, uint.MaxValue)
-        {
-            VariableActionHelper.ValidateContextType<TContext>();
-        }
+        { }
 
         public void UpdatePolicy(IPolicy<TContext>[] newPolicies)
         {

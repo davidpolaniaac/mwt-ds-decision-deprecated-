@@ -43,9 +43,7 @@ namespace MultiWorldTesting
         /// <param name="lambda">lambda = 0 implies uniform distribution. Large lambda is equivalent to a max.</param>
         public SoftmaxExplorer(IScorer<TContext> defaultScorer, float lambda) :
             this(defaultScorer, lambda, uint.MaxValue)
-        {
-            VariableActionHelper.ValidateContextType<TContext>();
-        }
+        { }
 
         public void UpdateScorer(IScorer<TContext> newScorer)
         {
