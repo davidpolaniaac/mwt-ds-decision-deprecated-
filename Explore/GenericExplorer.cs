@@ -37,9 +37,7 @@ namespace MultiWorldTesting
         /// <param name="defaultScorer">A function which outputs the probability of each action.</param>
         public GenericExplorer(IScorer<TContext> defaultScorer) :
             this(defaultScorer, uint.MaxValue)
-        {
-            VariableActionHelper.ValidateContextType<TContext>();
-        }
+        { }
 
         public void UpdateScorer(IScorer<TContext> newScorer)
         {

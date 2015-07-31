@@ -87,9 +87,7 @@ namespace MultiWorldTesting
         /// <param name="epsilon">The probability of a random exploration.</param>
         public EpsilonGreedyExplorer(IPolicy<TContext> defaultPolicy, float epsilon) :
             this(defaultPolicy, epsilon, uint.MaxValue)
-        {
-            VariableActionHelper.ValidateContextType<TContext>();
-        }
+        { }
 
         public void UpdatePolicy(IPolicy<TContext> newPolicy)
         {
