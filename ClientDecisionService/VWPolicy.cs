@@ -85,18 +85,7 @@ namespace ClientDecisionService
         /// <returns>true if the update was successful; otherwise, false.</returns>
         public bool ModelUpdate(Func<VowpalWabbitModel> loadModelFunc)
         {
-            VowpalWabbitModel vwModel = null;
-            try
-            {
-                vwModel = loadModelFunc();
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError("Unable to initialize VW.");
-                Trace.TraceError(ex.ToString());
-
-                return false;
-            }
+            VowpalWabbitModel vwModel = loadModelFunc();
 
             var factory = new VowpalWabbitPredictorFactory<TContext, TActionDependentFeature>(vwModel, new VW.Serializer.VowpalWabbitSerializerSettings { MaxExampleCacheSize = 1024 });
 
