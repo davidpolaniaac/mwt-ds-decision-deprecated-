@@ -19,7 +19,7 @@ namespace Microsoft.Research.DecisionService.Uploader
             this.MaxBufferSizeInBytes = 4 * 1024 * 1024;
             this.MaxDuration = TimeSpan.FromMinutes(1);
             this.MaxEventCount = 10000;
-            this.MaxUploadQueueCapacity = 100;
+            this.MaxUploadQueueCapacity = 1024;
             this.UploadRetryPolicy = BatchUploadRetryPolicy.ExponentialRetry;
             this.MaxDegreeOfSerializationParallelism = Environment.ProcessorCount;
         }

@@ -79,6 +79,16 @@ namespace ClientDecisionServiceTest
                 authorizationToken: MockCommandCenter.AuthorizationToken,
                 explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
 
+            dsConfig.JoinServiceBatchConfiguration = new Microsoft.Research.DecisionService.Uploader.BatchingConfiguration 
+            { 
+                MaxBufferSizeInBytes = 4 * 1024 * 1024,
+                MaxDuration = TimeSpan.FromMinutes(1),
+                MaxEventCount = 10000,
+                MaxUploadQueueCapacity = 1024 * 32,
+                UploadRetryPolicy = Microsoft.Research.DecisionService.Uploader.BatchUploadRetryPolicy.ExponentialRetry,
+                MaxDegreeOfSerializationParallelism = Environment.ProcessorCount
+            };
+
             dsConfig.LoggingServiceAddress = MockJoinServer.MockJoinServerAddress;
 
             var ds = new DecisionService<TestContext>(dsConfig);
@@ -142,6 +152,7 @@ namespace ClientDecisionServiceTest
         [TestInitialize]
         public void Setup()
         {
+            commandCenter = new MockCommandCenter(MockCommandCenter.AuthorizationToken);
             joinServer = new MockJoinServer(MockJoinServer.MockJoinServerAddress);
 
             joinServer.Run();
@@ -154,5 +165,6 @@ namespace ClientDecisionServiceTest
         }
 
         private MockJoinServer joinServer;
+        private MockCommandCenter commandCenter;
     }
 }

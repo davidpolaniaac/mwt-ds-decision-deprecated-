@@ -16,7 +16,7 @@ namespace ClientDecisionService
 
         public void Record(TContext context, uint[] actions, float probability, string uniqueKey)
         {
-            this.eventUploader.Upload(new MultiActionInteraction
+            this.eventUploader.TryUpload(new MultiActionInteraction
             { 
                 Key = uniqueKey,
                 Actions = actions,
@@ -27,7 +27,7 @@ namespace ClientDecisionService
 
         public void ReportReward(float reward, string uniqueKey)
         {
-            this.eventUploader.Upload(new Observation
+            this.eventUploader.TryUpload(new Observation
             {
                 Key = uniqueKey,
                 Value = new { Reward = reward }
@@ -36,7 +36,7 @@ namespace ClientDecisionService
 
         public void ReportOutcome(object outcome, string uniqueKey)
         {
-            this.eventUploader.Upload(new Observation
+            this.eventUploader.TryUpload(new Observation
             {
                 Key = uniqueKey,
                 Value = outcome

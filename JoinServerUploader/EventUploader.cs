@@ -111,6 +111,17 @@ namespace Microsoft.Research.DecisionService.Uploader
         }
 
         /// <summary>
+        /// Sends a single event to the buffer for upload in a non-blocking fashion 
+        /// where event is dropped if the buffer queue is full.
+        /// </summary>
+        /// <param name="e">The event to be uploaded.</param>
+        /// <returns>true if the event was accepted into the buffer queue for processing.</returns>
+        public bool TryUpload(IEvent e)
+        {
+            return this.eventSource.Post(e);
+        }
+
+        /// <summary>
         /// Sends multiple events to the buffer for upload.
         /// </summary>
         /// <param name="events">The list of events to be uploaded</param>
@@ -120,6 +131,22 @@ namespace Microsoft.Research.DecisionService.Uploader
             {
                 this.eventObserver.OnNext(e);
             }
+        }
+
+        /// <summary>
+        /// Sends multiple events to the buffer for upload in a non-blocking fashion
+        /// where events are dropped if the buffer queue is full.
+        /// </summary>
+        /// <param name="events">The list of events to be uploaded</param>
+        /// <returns>true if all events were accepted into the buffer queue for processing.</returns>
+        public bool TryUpload(List<IEvent> events)
+        {
+            bool accepted = true;
+            foreach (IEvent e in events)
+            {
+                accepted &= this.eventSource.Post(e);
+            }
+            return accepted;
         }
 
         /// <summary>
