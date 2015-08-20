@@ -1,4 +1,5 @@
 ﻿using ClientDecisionService;
+using Microsoft.Research.DecisionService.Uploader;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
@@ -64,6 +65,54 @@ namespace ClientDecisionServiceTest
             ds.Flush();
 
             Assert.AreEqual(4, joinServer.EventBatchList.Sum(batch => batch.ExperimentalUnitFragments.Count));
+        }
+
+        [TestMethod]
+        public void TestDSUploadSelective()
+        {
+            joinServer.Reset();
+
+            string uniqueKey = "test interaction";
+
+            var dsConfig = new DecisionServiceConfiguration<TestContext>(
+                authorizationToken: MockCommandCenter.AuthorizationToken,
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+
+            dsConfig.LoggingServiceAddress = MockJoinServer.MockJoinServerAddress;
+            dsConfig.JoinServiceBatchConfiguration = new BatchingConfiguration();
+            dsConfig.JoinServiceBatchConfiguration.MaxDuration = TimeSpan.FromMinutes(10); // allow enough time for queue to buffer events
+            dsConfig.JoinServiceBatchConfiguration.MaxDegreeOfSerializationParallelism = 1; // single-threaded for easy verification
+
+            int numEvents = 100;
+
+            // Set queue capacity to same number of events so selective dropping starts at 50% full
+            dsConfig.JoinServiceBatchConfiguration.MaxUploadQueueCapacity = numEvents;
+            dsConfig.JoinServiceBatchConfiguration.DroppingPolicy = new DroppingPolicy 
+            {
+                SelectiveUploadLevelThreshold = .5f,
+                
+                // when threshold is reached, drop half of the events
+                SelectProbability = .5f 
+            };
+
+            var ds = new DecisionService<TestContext>(dsConfig);
+            for (int i = 0; i < numEvents; i++)
+            {
+                uint[] chosenAction1 = ds.ChooseAction(uniqueKey, new TestContext());
+            }
+            ds.Flush();
+
+            // Some events must have been dropped so the total count cannot be same as original
+            Assert.IsTrue(joinServer.EventBatchList.Sum(batch => batch.ExperimentalUnitFragments.Count) < numEvents);
+
+            // Get number of events that have been downsampled, i.e. selected with probability q
+            int numSampledEvents = joinServer.EventBatchList
+                .SelectMany(batch => batch.ExperimentalUnitFragments.Select(e => e)).Where(e => e.Value.Contains(".0199")).Count();
+
+            Assert.IsTrue(numSampledEvents > 0);
+
+            // half of the events are selected with probability 0.5, so this should definitely be less than half the total events
+            Assert.IsTrue(numSampledEvents < numEvents / 2);
         }
 
         [TestMethod]

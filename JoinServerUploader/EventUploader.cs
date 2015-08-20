@@ -74,6 +74,8 @@ namespace Microsoft.Research.DecisionService.Uploader
                 .Select(w => w.Buffer(this.batchConfig.MaxEventCount, this.batchConfig.MaxBufferSizeInBytes, json => Encoding.UTF8.GetByteCount(json)))
                 .SelectMany(buffer => buffer)
                 .Subscribe(this.eventProcessor.AsObserver());
+
+            this.random = new Random();
         }
 
         /// <summary>
@@ -107,7 +109,10 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// <param name="e">The event to be uploaded.</param>
         public void Upload(IEvent e) 
         {
-            this.eventObserver.OnNext(e);
+            if (this.DownSampleEventIfQueueFull(e as Interaction))
+            {
+                this.eventObserver.OnNext(e);
+            }
         }
 
         /// <summary>
@@ -118,7 +123,11 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// <returns>true if the event was accepted into the buffer queue for processing.</returns>
         public bool TryUpload(IEvent e)
         {
-            return this.eventSource.Post(e);
+            if (this.DownSampleEventIfQueueFull(e as Interaction))
+            {
+                return this.eventSource.Post(e);
+            }
+            return false;
         }
 
         /// <summary>
@@ -262,6 +271,30 @@ namespace Microsoft.Research.DecisionService.Uploader
             }
         }
 
+        /// <summary>
+        /// Downsample an interaction event if the input buffer queue is at certain capacity specified in the batch configuration. 
+        /// In such cases, with probability Q, the event is selected for upload and modified so that its observed 
+        /// probability P is set to P * Q. Otherwise, the event is left unchanged.
+        /// </summary>
+        /// <param name="interaction">The interaction event.</param>
+        /// <returns>true if the event is selected for upload.</returns>
+        private bool DownSampleEventIfQueueFull(Interaction interaction)
+        {
+            if (interaction != null &&
+                this.eventSource.InputCount >= this.batchConfig.MaxUploadQueueCapacity * this.batchConfig.DroppingPolicy.SelectiveUploadLevelThreshold)
+            {
+                if (this.random.NextDouble() <= this.batchConfig.DroppingPolicy.SelectProbability)
+                {
+                    interaction.Probability *= this.batchConfig.DroppingPolicy.SelectProbability;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private static string BuildJsonMessage(EventBatch batch, int? experimentalUnitDuration)
         {
             StringBuilder jsonBuilder = new StringBuilder();
@@ -326,6 +359,7 @@ namespace Microsoft.Research.DecisionService.Uploader
         private readonly BatchingConfiguration batchConfig;
         private readonly string loggingServiceBaseAddress;
         private int? experimentalUnitDuration;
+        private Random random;
 
         private readonly TransformBlock<IEvent, string> eventSource;
         private readonly IObserver<IEvent> eventObserver;

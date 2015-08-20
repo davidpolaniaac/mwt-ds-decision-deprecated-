@@ -22,6 +22,7 @@ namespace Microsoft.Research.DecisionService.Uploader
             this.MaxUploadQueueCapacity = 1024;
             this.UploadRetryPolicy = BatchUploadRetryPolicy.ExponentialRetry;
             this.MaxDegreeOfSerializationParallelism = Environment.ProcessorCount;
+            this.DroppingPolicy = new DroppingPolicy();
         }
 
         /// <summary>
@@ -58,6 +59,11 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// Gets or sets the maxium degree of parallelism employed when serializing events.
         /// </summary>
         public int MaxDegreeOfSerializationParallelism { get; set; }
+
+        /// <summary>
+        /// Gets or sets the data dropping policy which controls which events are sent to the upload queue.
+        /// </summary>
+        public DroppingPolicy DroppingPolicy { get; set; }
     }
 
     /// <summary>
@@ -74,5 +80,26 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// Perform an exponential-backoff retry strategy with the upload.
         /// </summary>
         ExponentialRetry
+    }
+
+    public class DroppingPolicy
+    {
+        public DroppingPolicy()
+        {
+            // By default don't drop anything
+            SelectiveUploadLevelThreshold = 1f;
+            SelectProbability = 1f;
+        }
+
+        /// <summary>
+        /// Gets or sets the threshold level (measured in % of total queue size) at which point
+        /// data are selectively uploaded by the probability specified in <see cref="SelectProbability"/>.
+        /// </summary>
+        public float SelectiveUploadLevelThreshold { get; set; }
+
+        /// <summary>
+        /// Gets or sets the probability of uploading an event.
+        /// </summary>
+        public float SelectProbability { get; set; }
     }
 }
