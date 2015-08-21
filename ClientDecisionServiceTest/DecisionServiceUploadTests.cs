@@ -89,10 +89,10 @@ namespace ClientDecisionServiceTest
             dsConfig.JoinServiceBatchConfiguration.MaxUploadQueueCapacity = numEvents;
             dsConfig.JoinServiceBatchConfiguration.DroppingPolicy = new DroppingPolicy 
             {
-                SelectiveUploadLevelThreshold = .5f,
+                MaxQueueLevelBeforeDrop = .5f,
                 
                 // when threshold is reached, drop half of the events
-                SelectProbability = .5f 
+                ProbabilityOfDrop = .5f 
             };
 
             var ds = new DecisionService<TestContext>(dsConfig);

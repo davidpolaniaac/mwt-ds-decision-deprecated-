@@ -87,19 +87,19 @@ namespace Microsoft.Research.DecisionService.Uploader
         public DroppingPolicy()
         {
             // By default don't drop anything
-            SelectiveUploadLevelThreshold = 1f;
-            SelectProbability = 1f;
+            this.MaxQueueLevelBeforeDrop = 1f;
+            this.ProbabilityOfDrop = 0f;
         }
 
         /// <summary>
         /// Gets or sets the threshold level (measured in % of total queue size) at which point
-        /// data are selectively uploaded by the probability specified in <see cref="SelectProbability"/>.
+        /// data are randomly dropped by the probability specified in <see cref="ProbabilityOfDrop"/>.
         /// </summary>
-        public float SelectiveUploadLevelThreshold { get; set; }
+        public float MaxQueueLevelBeforeDrop { get; set; }
 
         /// <summary>
-        /// Gets or sets the probability of uploading an event.
+        /// Gets or sets the probability of dropping an event. This is used to reduce the system load.
         /// </summary>
-        public float SelectProbability { get; set; }
+        public float ProbabilityOfDrop { get; set; }
     }
 }
