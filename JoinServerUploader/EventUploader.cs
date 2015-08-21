@@ -109,7 +109,7 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// <param name="e">The event to be uploaded.</param>
         public void Upload(IEvent e) 
         {
-            if (!this.DropEventRandomlyIfNeeded(e as Interaction))
+            if (!this.DropEventRandomlyIfNeeded(e))
             {
                 this.eventObserver.OnNext(e);
             }
@@ -123,7 +123,7 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// <returns>true if the event was accepted into the buffer queue for processing.</returns>
         public bool TryUpload(IEvent e)
         {
-            if (!this.DropEventRandomlyIfNeeded(e as Interaction))
+            if (!this.DropEventRandomlyIfNeeded(e))
             {
                 return this.eventSource.Post(e);
             }
@@ -278,8 +278,9 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// </summary>
         /// <param name="interaction">The interaction event.</param>
         /// <returns>true if the event is dropped.</returns>
-        private bool DropEventRandomlyIfNeeded(Interaction interaction)
+        private bool DropEventRandomlyIfNeeded(IEvent e)
         {
+            Interaction interaction = e as Interaction;
             if (interaction != null &&
                 this.eventSource.InputCount >= this.batchConfig.MaxUploadQueueCapacity * this.batchConfig.DroppingPolicy.MaxQueueLevelBeforeDrop)
             {
