@@ -110,11 +110,11 @@
     <Reference Include="System.Xml" />
     <Reference Include="VowpalWabbit, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\VowpalWabbit.8.0.0.16\lib\net45\VowpalWabbit.dll</HintPath>
+      <HintPath>..\packages\VowpalWabbit.8.0.0.17\lib\net45\VowpalWabbit.dll</HintPath>
     </Reference>
     <Reference Include="VowpalWabbitCore, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\VowpalWabbit.8.0.0.16\lib\net45\VowpalWabbitCore.dll</HintPath>
+      <HintPath>..\packages\VowpalWabbit.8.0.0.17\lib\net45\VowpalWabbitCore.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
