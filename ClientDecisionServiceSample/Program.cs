@@ -29,7 +29,7 @@ namespace ClientDecisionServiceSample
 
             try
             {
-                SampleCodeUsingActionDependentFeatures();
+                SampleCodeUsingEventHubUploader().Wait();
             }
             catch (Exception e)
             {
@@ -174,6 +174,47 @@ namespace ClientDecisionServiceSample
                 }
                 
             }
+        }
+
+        private static async Task SampleCodeUsingEventHubUploader()
+        {
+            var uploader = new EventUploaderAsa("", "");
+
+            Stopwatch sw = new Stopwatch();
+
+            int numEvents = 100;
+            var events = new IEvent[numEvents];
+            for (int i = 0; i < numEvents; i++)
+            {
+                events[i] = new SingleActionInteraction 
+                { 
+                    Key = i.ToString(), 
+                    Action = 1, 
+                    Context = "context " + i, 
+                    Probability = (float)i / numEvents 
+                };
+            }
+            //await uploader.UploadAsync(events[0]);
+            uploader.Upload(events[0]);
+            
+            sw.Start();
+
+            //await uploader.UploadAsync(events.ToList());
+            uploader.UploadConcurrent(events.ToList());
+
+            events = new IEvent[numEvents];
+            for (int i = 0; i < numEvents; i++)
+            {
+                events[i] = new Observation
+                {
+                    Key = i.ToString(),
+                    Value = "observation " + i
+                };
+            }
+            //await uploader.UploadAsync(events.ToList());
+            uploader.UploadConcurrent(events.ToList());
+
+            Console.WriteLine(sw.Elapsed);
         }
 
         private static void SampleCodeUsingActionDependentFeatures()
