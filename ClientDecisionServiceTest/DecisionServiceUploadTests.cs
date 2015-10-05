@@ -25,7 +25,8 @@ namespace ClientDecisionServiceTest
 
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: MockCommandCenter.AuthorizationToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions),
+                getNumberOfActionsFunc: (Func<TestContext, uint>)(c => { return Constants.NumberOfActions; }));
 
             dsConfig.LoggingServiceAddress = MockJoinServer.MockJoinServerAddress;
 
@@ -51,7 +52,8 @@ namespace ClientDecisionServiceTest
 
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: MockCommandCenter.AuthorizationToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions),
+                getNumberOfActionsFunc: (Func<TestContext, uint>)(c => { return Constants.NumberOfActions; }));
 
             dsConfig.LoggingServiceAddress = MockJoinServer.MockJoinServerAddress;
 
@@ -76,7 +78,8 @@ namespace ClientDecisionServiceTest
 
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: MockCommandCenter.AuthorizationToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions),
+                getNumberOfActionsFunc: (Func<TestContext, uint>)(c => { return Constants.NumberOfActions; }));
 
             dsConfig.LoggingServiceAddress = MockJoinServer.MockJoinServerAddress;
             dsConfig.JoinServiceBatchConfiguration = new BatchingConfiguration();
@@ -126,7 +129,8 @@ namespace ClientDecisionServiceTest
 
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: MockCommandCenter.AuthorizationToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions),
+                getNumberOfActionsFunc: (Func<TestContext, uint>)(c => { return Constants.NumberOfActions; }));
 
             dsConfig.JoinServiceBatchConfiguration = new Microsoft.Research.DecisionService.Uploader.BatchingConfiguration 
             { 

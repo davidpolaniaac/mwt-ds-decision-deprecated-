@@ -119,10 +119,12 @@ namespace ClientDecisionServiceTest
                         context.Shared = new string[] { "s_1", "s_2" };
                     }
 
-                    vw.Learn(context);
+                    // TODO: fix this
+                    //vw.Learn(context);
                 }
 
-                vw.SaveModel(vwFileName);
+                // TODO: fix this
+                //vw.SaveModel(vwFileName);
             }
 
             byte[] vwModelBytes = File.ReadAllBytes(vwFileName);

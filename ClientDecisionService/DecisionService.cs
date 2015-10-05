@@ -60,7 +60,7 @@ namespace ClientDecisionService
                 }
             }
 
-            mwt = new MwtExplorer<TContext>(config.AuthorizationToken, this.recorder, this.GetNumberOfActions);
+            mwt = new MwtExplorer<TContext>(config.AuthorizationToken, this.recorder, config.GetNumberOfActionsFunc);
         }
 
         /// <summary>
@@ -135,17 +135,6 @@ namespace ClientDecisionService
         }
 
         public void Dispose() { }
-
-        internal uint GetNumberOfActions(TContext context)
-        {
-            var actionDependentContext = context as IActionDependentFeatureExample<object>;
-            if (actionDependentContext == null)
-            {
-                throw new ArgumentException("The provided context does not implement IActionDependentFeatureExample interface", "context");
-            }
-
-            return (uint)actionDependentContext.ActionDependentFeatures.Count;
-        }
 
         private ApplicationTransferMetadata GetBlobLocations(string token, string redirectionBlobLocation)
         {

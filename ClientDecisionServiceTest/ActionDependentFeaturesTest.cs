@@ -18,7 +18,8 @@ namespace ClientDecisionServiceTest
 
             var dsConfig = new DecisionServiceConfiguration<TestADFContext>(
                 authorizationToken: MockCommandCenter.AuthorizationToken,
-                explorer: new EpsilonGreedyExplorer<TestADFContext>(new TestADFPolicy(), epsilon: 0.5f))
+                explorer: new EpsilonGreedyExplorer<TestADFContext>(new TestADFPolicy(), epsilon: 0.5f),
+                getNumberOfActionsFunc: (Func<TestADFContext, uint>)(c => { return (uint)c.ActionDependentFeatures.Count; }))
             {
                 PollingForModelPeriod = TimeSpan.MinValue,
                 PollingForSettingsPeriod = TimeSpan.MinValue,
@@ -56,7 +57,8 @@ namespace ClientDecisionServiceTest
 
             var dsConfig = new DecisionServiceConfiguration<TestADFContextWithFeatures>(
                 authorizationToken: MockCommandCenter.AuthorizationToken,
-                explorer: new EpsilonGreedyExplorer<TestADFContextWithFeatures>(new TestADFWithFeaturesPolicy(), epsilon: 0.5f))
+                explorer: new EpsilonGreedyExplorer<TestADFContextWithFeatures>(new TestADFWithFeaturesPolicy(), epsilon: 0.5f),
+                getNumberOfActionsFunc: (Func<TestADFContextWithFeatures, uint>)(c => { return (uint)c.ActionDependentFeatures.Count; }))
             {
                 LoggingServiceAddress = MockJoinServer.MockJoinServerAddress,
                 PollingForModelPeriod = TimeSpan.MinValue,
@@ -82,7 +84,7 @@ namespace ClientDecisionServiceTest
                     byte[] modelContent = commandCenter.GetModelBlobContent(numExamples: 3 + modelIndex, numFeatureVectors: 4 + modelIndex);
                     System.IO.File.WriteAllBytes(currentModelFile, modelContent);
 
-                    ds.UpdatePolicy(new VWPolicy<TestADFContextWithFeatures, TestADFFeatures>(currentModelFile));
+                    ds.UpdatePolicy(new VWPolicy<TestADFContextWithFeatures, TestADFFeatures>(GetFeaturesFromContext, currentModelFile));
 
                     actualModelFiles.Add(currentModelFile);
                 }
@@ -120,7 +122,8 @@ namespace ClientDecisionServiceTest
 
             var dsConfig = new DecisionServiceConfiguration<TestADFContextWithFeatures>(
                 authorizationToken: MockCommandCenter.AuthorizationToken,
-                explorer: new EpsilonGreedyExplorer<TestADFContextWithFeatures>(new TestADFWithFeaturesPolicy(), epsilon: 0.5f))
+                explorer: new EpsilonGreedyExplorer<TestADFContextWithFeatures>(new TestADFWithFeaturesPolicy(), epsilon: 0.5f),
+                getNumberOfActionsFunc: (Func<TestADFContextWithFeatures, uint>)(c => { return (uint)c.ActionDependentFeatures.Count; }))
             {
                 LoggingServiceAddress = MockJoinServer.MockJoinServerAddress,
                 PollingForModelPeriod = TimeSpan.MinValue,
@@ -184,6 +187,11 @@ namespace ClientDecisionServiceTest
         public void CleanUp()
         {
             joinServer.Stop();
+        }
+
+        private static IReadOnlyCollection<TestADFFeatures> GetFeaturesFromContext(TestADFContextWithFeatures context)
+        {
+            return context.ActionDependentFeatures;
         }
 
         private MockJoinServer joinServer;

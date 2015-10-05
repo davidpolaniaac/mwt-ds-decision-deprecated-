@@ -176,12 +176,28 @@ namespace ClientDecisionServiceSample
             }
         }
 
+        private static uint GetNumberOfActionsFromUserContext(UserContext context)
+        {
+            return (uint)context.FeatureVector.Count;
+        }
+
+        private static uint GetNumberOfActionsFromAdfContext(ADFContext context)
+        {
+            return (uint)context.ActionDependentFeatures.Count;
+        }
+
+        private static IReadOnlyCollection<ADFFeatures> GetFeaturesFromContext(ADFContext context)
+        {
+            return context.ActionDependentFeatures;
+        }
+
         private static void SampleCodeUsingActionDependentFeatures()
         {
             // Create configuration for the decision service
             var serviceConfig = new DecisionServiceConfiguration<ADFContext>(
                 authorizationToken: "10198550-a074-4f9c-8b15-cc389bc2bbbe",
-                explorer: new EpsilonGreedyExplorer<ADFContext>(new ADFPolicy(), epsilon: 0.8f))
+                explorer: new EpsilonGreedyExplorer<ADFContext>(new ADFPolicy(), epsilon: 0.8f),
+                getNumberOfActionsFunc: GetNumberOfActionsFromAdfContext)
             //explorer = new TauFirstExplorer<MyContext>(new UserPolicy(), tau: 50, numActions: 10))
             //explorer = new BootstrapExplorer<MyContext>(new IPolicy<MyContext>[2] { new UserPolicy(), new UserPolicy() }, numActions: 10))
             //explorer = new SoftmaxExplorer<MyContext>(new UserScorer(), lambda: 0.5f, numActions: 10))
@@ -197,7 +213,7 @@ namespace ClientDecisionServiceSample
 
             var rg = new Random(uniqueKey.GetHashCode());
 
-            var vwPolicy = new VWPolicy<ADFContext,ADFFeatures>();
+            var vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext);
 
             for (int i = 1; i < 100; i++)
             {
@@ -205,7 +221,7 @@ namespace ClientDecisionServiceSample
                 {
                     string vwModelFile = TrainNewVWModelWithRandomData(numExamples: 5, numActions: 10);
 
-                    vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(vwModelFile);
+                    vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, vwModelFile);
 
                     // Alternatively, VWPolicy can also be loaded from an IO stream:
                     // var vwModelStream = new MemoryStream(File.ReadAllBytes(vwModelFile));
@@ -260,10 +276,12 @@ namespace ClientDecisionServiceSample
                         context.Shared = new string[] { "s_1", "s_2" };
                     }
 
-                    vw.Learn(context);
+                    // TODO: fix this
+                    //vw.Learn(context, context.ActionDependentFeatures);
                 }
 
-                vw.SaveModel(vwFileName);
+                // TODO: fix this
+                //vw.SaveModel(vwFileName);
             }
             return vwFileName;
         }
@@ -296,7 +314,8 @@ namespace ClientDecisionServiceSample
 
             var serviceConfig = new DecisionServiceConfiguration<UserContext>(
                 authorizationToken: "10198550-a074-4f9c-8b15-cc389bc2bbbe",
-                explorer: new EpsilonGreedyExplorer<UserContext>(new UserPolicy(2), epsilon: 0.2f, numActions: 2))
+                explorer: new EpsilonGreedyExplorer<UserContext>(new UserPolicy(2), epsilon: 0.2f, numActions: 2),
+                getNumberOfActionsFunc: GetNumberOfActionsFromUserContext)
             {
                 JoinServiceBatchConfiguration = new BatchingConfiguration()
                 {
@@ -416,7 +435,7 @@ namespace ClientDecisionServiceSample
         public IDictionary<string, float> FeatureVector { get; set; }
     }
 
-    public class ADFContext : SharedExample, IActionDependentFeatureExample<ADFFeatures>
+    public class ADFContext
     {
         [Feature]
         public string[] Shared { get; set; }
@@ -454,7 +473,7 @@ namespace ClientDecisionServiceSample
         }
     }
 
-    public class ADFFeatures : IExample
+    public class ADFFeatures
     {
         [Feature]
         public string[] Features { get; set; }

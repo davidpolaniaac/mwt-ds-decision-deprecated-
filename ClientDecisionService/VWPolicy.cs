@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.IO;
+using System.Collections.Generic;
 
 namespace ClientDecisionService
 {
@@ -14,20 +15,15 @@ namespace ClientDecisionService
     /// </summary>
     /// <typeparam name="TContext">The type of the context.</typeparam>
     public class VWPolicy<TContext, TActionDependentFeature> : IPolicy<TContext>, IDisposable
-        where TContext : SharedExample, IActionDependentFeatureExample<TActionDependentFeature>
-        where TActionDependentFeature : IExample
     {
         /// <summary>
         /// Constructor using an optional model file.
         /// </summary>
         /// <param name="vwModelFile">Optional; the VowpalWabbit model file to load from.</param>
-        public VWPolicy(string vwModelFile = null)
+        public VWPolicy(Func<TContext, IReadOnlyCollection<TActionDependentFeature>> getContextFeaturesFunc, string vwModelFile = null)
         {
-            if (vwModelFile == null)
-            {
-                this.vwPool = new ObjectPool<VowpalWabbitPredictor<TContext, TActionDependentFeature>>(null);
-            }
-            else
+            this.getContextFeaturesFunc = getContextFeaturesFunc;
+            if (vwModelFile != null)
             {
                 this.ModelUpdate(vwModelFile);
             }
@@ -49,12 +45,19 @@ namespace ClientDecisionService
         /// <returns>List of predicted actions.</returns>
         public uint[] ChooseAction(TContext context)
         {
-            using (var vw = vwPool.Get())
+            if (vwPool == null)
             {
-                int[] vwMultilabelPredictions = vw.Value.PredictIndex(context);
+                // TODO: return null or empty array, check with Stephen
+            }
+            using (var vw = vwPool.GetOrCreate())
+            {
+                IReadOnlyCollection<TActionDependentFeature> features = this.getContextFeaturesFunc(context);
+
+                // return indices
+                Tuple<int, TActionDependentFeature>[] vwMultilabelPredictions = vw.Value.Predict(context, features);
 
                 // VW multi-label predictions are 0-based
-                return vwMultilabelPredictions.Select(p => (uint)(p + 1)).ToArray();
+                return vwMultilabelPredictions.Select(p => (uint)(p.Item1 + 1)).ToArray();
             }
         }
 
@@ -65,7 +68,7 @@ namespace ClientDecisionService
         /// <returns>true if the update was successful; otherwise, false.</returns>
         public bool ModelUpdate(string modelFile)
         {
-            return ModelUpdate(() => { return new VowpalWabbitModel(string.Format("--quiet -t -i {0}", modelFile)); });
+            return ModelUpdate(() => { return new VowpalWabbitModel(new VowpalWabbitSettings(string.Format("--quiet -t -i {0}", modelFile), maxExampleCacheSize: 1024)); });
         }
 
         /// <summary>
@@ -75,7 +78,7 @@ namespace ClientDecisionService
         /// <returns>true if the update was successful; otherwise, false.</returns>
         public bool ModelUpdate(Stream modelStream)
         {
-            return ModelUpdate(() => { return new VowpalWabbitModel("--quiet -t", modelStream); });
+            return ModelUpdate(() => new VowpalWabbitModel(new VowpalWabbitSettings("--quiet -t", modelStream: modelStream, maxExampleCacheSize: 1024)));
         }
 
         /// <summary>
@@ -87,15 +90,9 @@ namespace ClientDecisionService
         {
             VowpalWabbitModel vwModel = loadModelFunc();
 
-            var factory = new VowpalWabbitPredictorFactory<TContext, TActionDependentFeature>(vwModel, new VW.Serializer.VowpalWabbitSerializerSettings { MaxExampleCacheSize = 1024 });
-
             if (this.vwPool == null)
             {
-                this.vwPool = new ObjectPool<VowpalWabbitPredictor<TContext, TActionDependentFeature>>(factory);
-            }
-            else
-            {
-                vwPool.UpdateFactory(factory);
+                this.vwPool = new VowpalWabbitThreadedPrediction<TContext, TActionDependentFeature>(vwModel);
             }
 
             return true;
@@ -126,6 +123,7 @@ namespace ClientDecisionService
             }
         }
 
-        private ObjectPool<VowpalWabbitPredictor<TContext, TActionDependentFeature>> vwPool;
+        private VowpalWabbitThreadedPrediction<TContext, TActionDependentFeature> vwPool;
+        private Func<TContext, IReadOnlyCollection<TActionDependentFeature>> getContextFeaturesFunc;
     }
 }
