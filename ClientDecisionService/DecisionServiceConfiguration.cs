@@ -10,7 +10,7 @@ namespace ClientDecisionService
     /// </summary>
     public class DecisionServiceConfiguration<TContext>
     {
-        public DecisionServiceConfiguration(string authorizationToken, IExplorer<TContext> explorer)
+        public DecisionServiceConfiguration(string authorizationToken, IExplorer<TContext> explorer, Func<TContext, uint> getNumberOfActionsFunc)
         {
             if (authorizationToken == null)
             {
@@ -22,8 +22,14 @@ namespace ClientDecisionService
                 throw new ArgumentNullException("explorer", "Exploration algorithm cannot be null");
             }
 
+            if (getNumberOfActionsFunc == null)
+            {
+                throw new ArgumentNullException("getNumberOfActionsFunc", "A method to retrieve number of actions from the context must be specified.");
+            }
+
             this.AuthorizationToken = authorizationToken;
             this.Explorer = explorer;
+            this.GetNumberOfActionsFunc = getNumberOfActionsFunc;
         }
 
         /// <summary>
@@ -135,6 +141,8 @@ namespace ClientDecisionService
                 pollingForModelPeriod = value;
             }
         }
+
+        public Func<TContext, uint> GetNumberOfActionsFunc { get; set; }
 
         public Action<Exception> ModelPollFailureCallback { get; set; }
         public Action<Exception> SettingsPollFailureCallback { get; set; }

@@ -21,7 +21,8 @@ namespace ClientDecisionServiceTest
         {
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: "my token",
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: 2));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: 2),
+                getNumberOfActionsFunc: (Func<TestContext, uint>)(c => { return (uint)2; }));
 
             dsConfig.OfflineMode = true;
 
@@ -40,7 +41,8 @@ namespace ClientDecisionServiceTest
         {
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: "my token",
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions),
+                getNumberOfActionsFunc: (Func<TestContext, uint>)(c => { return Constants.NumberOfActions; }));
 
             dsConfig.OfflineMode = true;
             dsConfig.Recorder = new TestLogger();
@@ -82,7 +84,8 @@ namespace ClientDecisionServiceTest
         {
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: MockCommandCenter.AuthorizationToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions),
+                getNumberOfActionsFunc: (Func<TestContext, uint>)(c => { return Constants.NumberOfActions; }));
 
             dsConfig.Recorder = new TestLogger();
 
@@ -126,7 +129,8 @@ namespace ClientDecisionServiceTest
             /*** This test requires real value of RedirectionBlobLocation set in DecisionServiceConstants.cs file ***/
             var dsConfig = new DecisionServiceConfiguration<TestContext>(
                 authorizationToken: MockCommandCenter.AuthorizationToken,
-                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions));
+                explorer: new EpsilonGreedyExplorer<TestContext>(new TestPolicy(), epsilon: 0.2f, numActions: Constants.NumberOfActions),
+                getNumberOfActionsFunc: (Func<TestContext, uint>)(c => { return Constants.NumberOfActions; }));
 
             bool isExceptionExpected = false;
             try

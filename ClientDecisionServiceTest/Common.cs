@@ -16,7 +16,7 @@ namespace ClientDecisionServiceTest
         public int A { get; set; }
     }
 
-    class TestADFContext : IActionDependentFeatureExample<string>
+    class TestADFContext
     {
         public TestADFContext(int count)
         {
@@ -40,7 +40,7 @@ namespace ClientDecisionServiceTest
         private int count;
     }
 
-    public class TestADFContextWithFeatures : SharedExample, IActionDependentFeatureExample<TestADFFeatures>
+    public class TestADFContextWithFeatures
     {
         [Feature]
         public string[] Shared { get; set; }
@@ -78,7 +78,7 @@ namespace ClientDecisionServiceTest
         }
     }
 
-    public class TestADFFeatures : IExample
+    public class TestADFFeatures
     {
         [Feature]
         public string[] Features { get; set; }

@@ -4,6 +4,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using System;
+using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -119,10 +120,14 @@ namespace ClientDecisionServiceTest
                         context.Shared = new string[] { "s_1", "s_2" };
                     }
 
-                    vw.Learn(context);
+                    vw.Learn(
+                        context, 
+                        context.ActionDependentFeatures, 
+                        context.ActionDependentFeatures.IndexOf(f => f.Label != null), 
+                        context.ActionDependentFeatures.First(f => f.Label != null).Label);
                 }
 
-                vw.SaveModel(vwFileName);
+                vw.Native.SaveModel(vwFileName);
             }
 
             byte[] vwModelBytes = File.ReadAllBytes(vwFileName);
