@@ -33,8 +33,9 @@ namespace ClientDecisionService
         /// Constructor using a memory stream.
         /// </summary>
         /// <param name="vwModelStream">The VW model memory stream.</param>
-        public VWPolicy(Stream vwModelStream)
+        public VWPolicy(Func<TContext, IReadOnlyCollection<TActionDependentFeature>> getContextFeaturesFunc, Stream vwModelStream)
         {
+            this.getContextFeaturesFunc = getContextFeaturesFunc;
             this.ModelUpdate(vwModelStream);
         }
 

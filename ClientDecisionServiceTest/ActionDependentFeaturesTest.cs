@@ -149,7 +149,7 @@ namespace ClientDecisionServiceTest
 
                     var modelStream = new MemoryStream(modelContent);
 
-                    ds.UpdatePolicy(new VWPolicy<TestADFContextWithFeatures, TestADFFeatures>(modelStream));
+                    ds.UpdatePolicy(new VWPolicy<TestADFContextWithFeatures, TestADFFeatures>(GetFeaturesFromContext, modelStream));
                 }
 
                 int numActions = rg.Next(5, 20);

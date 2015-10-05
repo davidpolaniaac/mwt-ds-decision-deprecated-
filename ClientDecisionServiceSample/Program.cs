@@ -276,12 +276,14 @@ namespace ClientDecisionServiceSample
                         context.Shared = new string[] { "s_1", "s_2" };
                     }
 
-                    // TODO: fix this
-                    //vw.Learn(context, context.ActionDependentFeatures);
+                    vw.Learn(
+                        context, 
+                        context.ActionDependentFeatures, 
+                        context.ActionDependentFeatures.IndexOf(f => f.Label != null), 
+                        context.ActionDependentFeatures.First(f => f.Label != null).Label);
                 }
 
-                // TODO: fix this
-                //vw.SaveModel(vwFileName);
+                vw.Native.SaveModel(vwFileName);
             }
             return vwFileName;
         }
