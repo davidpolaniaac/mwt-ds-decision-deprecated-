@@ -2,10 +2,10 @@
 <package>
   <metadata>
     <title>Multiworld Testing Client Library</title>
-    <id>MwtClientLibrary</id>
+    <id>$id$</id>
     <tags>Multiworld Testing</tags>
-    <version>1.0.0.0</version>
-    <authors>Microsoft Research</authors>
+    <version>$version$</version>
+    <authors>John Langford, Luong Hoang, Markus Cozowicz, Sarah Bird, Sid Sen (mwtdev@microsoft.com)</authors>
     <projectUrl>http://aka.ms/mwt</projectUrl>
     <licenseUrl>https://github.com/JohnLangford/vowpal_wabbit/blob/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
