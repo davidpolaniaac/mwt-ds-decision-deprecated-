@@ -29,7 +29,7 @@ namespace ClientDecisionServiceSample
 
             try
             {
-                SampleCodeUsingEventHubUploader();
+                SampleCodeUsingDecisionServiceWithASAJoinServer();
             }
             catch (Exception e)
             {
@@ -174,6 +174,39 @@ namespace ClientDecisionServiceSample
                 }
                 
             }
+        }
+
+        private static void SampleCodeUsingDecisionServiceWithASAJoinServer()
+        {
+            // Create configuration for the decision service
+            var serviceConfig = new DecisionServiceConfiguration<ADFContext>(
+                authorizationToken: "10198550-a074-4f9c-8b15-cc389bc2bbbe",
+                explorer: new EpsilonGreedyExplorer<ADFContext>(new ADFPolicy(), epsilon: 0.8f),
+                getNumberOfActionsFunc: GetNumberOfActionsFromAdfContext)
+            {
+                PollingForModelPeriod = TimeSpan.MinValue,
+                PollingForSettingsPeriod = TimeSpan.MinValue,
+                JoinServerType = ClientDecisionService.JoinServerType.AzureStreamAnalytics,
+                AzureStreamAnalyticsConnectionString = "Endpoint=sb://mwtbus.servicebus.windows.net/;SharedAccessKeyName=MWTASA;SharedAccessKey=Gt6SZtMJvESLQM74pfZyaYwYbn7X5YHBqi1QntpooNc=",
+                EventHubInputName = "Impressions"
+            };
+
+            var service = new DecisionService<ADFContext>(serviceConfig);
+
+            string uniqueKey = "asa-client";
+
+            var rg = new Random(uniqueKey.GetHashCode());
+
+            var vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext);
+
+            for (int i = 1; i < 100; i++)
+            {
+                int numActions = rg.Next(5, 10);
+                uint[] action = service.ChooseAction(uniqueKey, ADFContext.CreateRandom(numActions, rg));
+                service.ReportReward(i / 100f, uniqueKey);
+            }
+
+            service.Flush();
         }
 
 	    private static void SampleCodeUsingEventHubUploader()
