@@ -21,7 +21,7 @@ namespace Microsoft.Research.DecisionService.Uploader
     /// <summary>
     /// Uploader class to interface with the ASA-based Join Server provided by user applications.
     /// </summary>
-    public class EventUploaderAsa : IDisposable
+    public class EventUploaderASA : BaseEventUploader<IEvent>
     {
         private string connectionString;
         private string eventHubInputName;
@@ -30,9 +30,18 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// <summary>
         /// Constructs an uploader object.
         /// </summary>
-        public EventUploaderAsa(string connectionString, string eventHubInputName)
+        /// <param name="azureStreamAnalyticsConnectionString">The Azure Stream Analytics connection string.</param>
+        /// <param name="eventHubInputName">The EventHub input name where data are sent to.</param>
+        /// <param name="batchConfig">Optional; The batching configuration to used when uploading data.</param>
+        public EventUploaderASA
+        (
+            string azureStreamAnalyticsConnectionString, 
+            string eventHubInputName, 
+            BatchingConfiguration batchConfig = null
+        ) 
+        : base(batchConfig)
         {
-            this.connectionString = connectionString;
+            this.connectionString = azureStreamAnalyticsConnectionString;
             this.eventHubInputName = eventHubInputName;
             
             var builder = new ServiceBusConnectionStringBuilder(this.connectionString)
@@ -42,56 +51,47 @@ namespace Microsoft.Research.DecisionService.Uploader
             this.client = EventHubClient.CreateFromConnectionString(builder.ToString(), this.eventHubInputName);
         }
 
-        public void Upload(IEvent e) 
+        /// <summary>
+        /// Transforms an event to another type suitable for uploading.
+        /// </summary>
+        /// <param name="sourceEvent">The source event to be transformed.</param>
+        /// <returns>The transformed event to be uploaded.</returns>
+        public override IEvent TransformEvent(IEvent sourceEvent)
         {
-            this.UploadToEventHub(e);
-        }
-
-        public void UploadConcurrent(List<IEvent> events)
-        {
-            Parallel.For(
-                fromInclusive: 0, 
-                toExclusive: events.Count, 
-                parallelOptions: new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount * 2 }, 
-                body: i => 
-            {
-                // Sending messages with EventHubClient is thread-safe (but not necessarily so for other APIs)
-                // http://stackoverflow.com/questions/26898930/what-azure-net-sdk-eventhubclient-instance-methods-are-threadsafe
-                this.UploadToEventHub(events[i]);
-            });
-        }
-
-        public async Task UploadAsync(IEvent e)
-        {
-            await this.UploadToEventHubAsync(e);
-        }
-
-        public async Task UploadAsync(List<IEvent> events)
-        {
-            await Task.WhenAll(events.Select(e => this.UploadAsync(e)));
+            return sourceEvent;
         }
 
         /// <summary>
-        /// Flush the data buffer to upload all remaining events.
+        /// Measures the size of the transformed event in bytes.
         /// </summary>
-        public void Flush()
+        /// <param name="transformedEvent">The transformed event.</param>
+        /// <returns>The size in bytes of the transformed event.</returns>
+        public override int MeasureTransformedEvent(IEvent transformedEvent)
         {
+            // TODO: BuildJsonMessage is called twice, during measure and during upload.
+            return Encoding.UTF8.GetByteCount(BuildJsonMessage(transformedEvent));
         }
 
         /// <summary>
-        /// Disposes the current object and all internal members.
+        /// Uploads multiple events to EventHub asynchronously.
         /// </summary>
-        public void Dispose()
+        /// <param name="transformedEvents">The list of events to upload.</param>
+        /// <returns>A Task object.</returns>
+        public override async Task UploadTransformedEvents(IList<IEvent> transformedEvents)
         {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
+            await Task.WhenAll(transformedEvents.Select(e => this.UploadToEventHubAsync(e)));
         }
 
-        private void UploadToEventHub(IEvent e)
+        /// <summary>
+        /// Uploads a single event to EventHub asynchronously.
+        /// </summary>
+        /// <param name="events">The event to upload.</param>
+        /// <returns>A Task object.</returns>
+        private async Task UploadToEventHubAsync(IEvent events)
         {
             try
             {
-                this.client.Send(BuildEventHubData(e));
+                await this.client.SendAsync(BuildEventHubData(events));
             }
             catch (Exception exp)
             {
@@ -99,25 +99,23 @@ namespace Microsoft.Research.DecisionService.Uploader
             }
         }
 
-        private async Task UploadToEventHubAsync(IEvent e)
-        {
-            try
-            {
-                await this.client.SendAsync(BuildEventHubData(e));
-            }
-            catch (Exception exp)
-            {
-                Console.WriteLine("Error on send: " + exp.Message);
-            }
-        }
-
-        private void Dispose(bool disposing)
+        /// <summary>
+        /// Disposes all internal members.
+        /// </summary>
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
+                client.Close();
             }
+            base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// Converts an event to JSON format that is expected from EventHub.
+        /// </summary>
+        /// <param name="e">The event to convert.</param>
+        /// <returns>Serialized JSON string.</returns>
         private static string BuildJsonMessage(IEvent e)
         {
             var jsonBuilder = new StringBuilder();
@@ -128,6 +126,11 @@ namespace Microsoft.Research.DecisionService.Uploader
             return jsonBuilder.ToString();
         }
 
+        /// <summary>
+        /// Builds a data object to send to EventHub.
+        /// </summary>
+        /// <param name="e">The original event.</param>
+        /// <returns>An EventData object.</returns>
         private static EventData BuildEventHubData(IEvent e)
         {
             var serializedString = BuildJsonMessage(e);
@@ -136,45 +139,5 @@ namespace Microsoft.Research.DecisionService.Uploader
                 PartitionKey = e.Key
             };
         }
-
-        private void RaiseSentEvent(EventBatch batch)
-        {
-            if (batch != null)
-            {
-                if (batch.JsonEvents != null)
-                {
-                    Trace.TraceInformation("Successfully uploaded batch with {0} events.", batch.JsonEvents.Count);
-                }
-                if (PackageSent != null)
-                {
-                    PackageSent(this, new PackageEventArgs { PackageId = batch.Id, Records = batch.JsonEvents });
-                }
-            }
-        }
-
-        private void RaiseSendFailedEvent(EventBatch batch, Exception ex)
-        {
-            if (batch != null)
-            {
-                if (ex != null)
-                {
-                    Trace.TraceError("Unable to upload batch: " + ex.ToString());
-                }
-                if (PackageSendFailed != null)
-                {
-                    PackageSendFailed(this, new PackageEventArgs { PackageId = batch.Id, Records = batch.JsonEvents, Exception = ex });
-                }
-            }
-        }
-
-        /// <summary>
-        /// Occurs when a package was successfully uploaded to the join server.
-        /// </summary>
-        public event PackageSentEventHandler PackageSent;
-
-        /// <summary>
-        /// Occurs when a package was not successfully uploaded to the join server.
-        /// </summary>
-        public event PackageSendFailedEventHandler PackageSendFailed;
     }
 }

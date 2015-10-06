@@ -29,7 +29,7 @@ namespace ClientDecisionServiceSample
 
             try
             {
-                SampleCodeUsingEventHubUploader().Wait();
+                SampleCodeUsingEventHubUploader();
             }
             catch (Exception e)
             {
@@ -175,9 +175,10 @@ namespace ClientDecisionServiceSample
                 
             }
         }
-	private static async Task SampleCodeUsingEventHubUploader()
+
+	    private static void SampleCodeUsingEventHubUploader()
         {
-            var uploader = new EventUploaderAsa("", "");
+            var uploader = new EventUploaderASA("", "");
 
             Stopwatch sw = new Stopwatch();
 
@@ -199,7 +200,7 @@ namespace ClientDecisionServiceSample
             sw.Start();
 
             //await uploader.UploadAsync(events.ToList());
-            uploader.UploadConcurrent(events.ToList());
+            uploader.Upload(events.ToList());
 
             events = new IEvent[numEvents];
             for (int i = 0; i < numEvents; i++)
@@ -211,7 +212,7 @@ namespace ClientDecisionServiceSample
                 };
             }
             //await uploader.UploadAsync(events.ToList());
-            uploader.UploadConcurrent(events.ToList());
+            uploader.Upload(events.ToList());
 
             Console.WriteLine(sw.Elapsed);
         }

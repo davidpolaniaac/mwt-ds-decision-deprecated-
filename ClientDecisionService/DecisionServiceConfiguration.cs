@@ -93,7 +93,12 @@ namespace ClientDecisionService
                 batchConfig = value;
             } 
         }
-        
+
+        /// <summary>
+        /// Type of Join Server implementation to use.
+        /// </summary>
+        public JoinServerType JoinServerType { get; set; }
+
         /// <summary>
         /// Specifies the address for a custom HTTP logging service.
         /// </summary>
@@ -109,6 +114,16 @@ namespace ClientDecisionService
                 loggingServiceAddress = value;
             } 
         }
+
+        /// <summary>
+        /// The ASA connection string to use if ASA-based Join Server is selected.
+        /// </summary>
+        public string AzureStreamAnalyticsConnectionString { get; set; }
+
+        /// <summary>
+        /// The EventHub input name to use if ASA-based Join Server is selected.
+        /// </summary>
+        public string EventHubInputName { get; set; }
 
         /// <summary>
         /// Specifies the polling period to check for updated application settings.

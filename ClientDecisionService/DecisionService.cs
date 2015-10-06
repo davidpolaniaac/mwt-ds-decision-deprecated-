@@ -24,10 +24,24 @@ namespace ClientDecisionService
 
             if (!config.OfflineMode)
             {
-                this.recorder = config.Recorder ?? new JoinServiceLogger<TContext>(
-                    config.JoinServiceBatchConfiguration,
-                    config.AuthorizationToken,
-                    config.LoggingServiceAddress);
+                var joinServerLogger = new JoinServiceLogger<TContext>();
+                switch (config.JoinServerType)
+                {
+                    case JoinServerType.CustomAzureSolution:
+                        joinServerLogger.InitializeWithCustomAzureJoinServer(
+                            config.AuthorizationToken, 
+                            config.LoggingServiceAddress, 
+                            config.JoinServiceBatchConfiguration);
+                        break;
+                    case JoinServerType.AzureStreamAnalytics:
+                        joinServerLogger.InitializeWithAzureStreamAnalyticsJoinServer(
+                            config.AzureStreamAnalyticsConnectionString, 
+                            config.EventHubInputName, 
+                            config.JoinServiceBatchConfiguration);
+                        break;
+                }
+
+                this.recorder = config.Recorder ?? joinServerLogger;
 
                 this.settingsBlobPollDelay = config.PollingForSettingsPeriod == TimeSpan.Zero ? DecisionServiceConstants.PollDelay : config.PollingForSettingsPeriod;
                 this.modelBlobPollDelay = config.PollingForModelPeriod == TimeSpan.Zero ? DecisionServiceConstants.PollDelay : config.PollingForModelPeriod;

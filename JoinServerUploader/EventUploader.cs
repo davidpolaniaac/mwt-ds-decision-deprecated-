@@ -18,8 +18,24 @@ namespace Microsoft.Research.DecisionService.Uploader
     /// <summary>
     /// Uploader class to interface with the Join Server provided by Multiworld Testing Service.
     /// </summary>
-    public class EventUploader : IDisposable
+    public class EventUploader : BaseEventUploader<string>
     {
+        private readonly string loggingServiceBaseAddress;
+        private int? experimentalUnitDuration;
+        private Func<IEvent, string> eventSerializer;
+
+        private IHttpClient httpClient;
+
+        /// <summary>
+        /// Occurs when a package was successfully uploaded to the join server.
+        /// </summary>
+        public event PackageSentEventHandler PackageSent;
+
+        /// <summary>
+        /// Occurs when a package was not successfully uploaded to the join server.
+        /// </summary>
+        public event PackageSendFailedEventHandler PackageSendFailed;
+
         /// <summary>
         /// Constructs an uploader object.
         /// </summary>
@@ -31,51 +47,24 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// <param name="batchConfig">Optional; The batching configuration that controls the buffer size.</param>
         /// <param name="loggingServiceBaseAddress">Optional; The address of a custom HTTP logging service. When null, the join service address is used.</param>
         /// <param name="httpClient">Optional; The custom <see cref="IHttpClient"/> object to handle HTTP requests.</param>
-        public EventUploader(BatchingConfiguration batchConfig = null, string loggingServiceBaseAddress = null, IHttpClient httpClient = null)
+        public EventUploader(BatchingConfiguration batchConfig = null, string loggingServiceBaseAddress = null, IHttpClient httpClient = null) : base(batchConfig)
         {
-            this.batchConfig = batchConfig ?? new BatchingConfiguration();
-
             this.loggingServiceBaseAddress = loggingServiceBaseAddress ?? Constants.ServiceAddress;
 
             this.httpClient = httpClient ?? new UploaderHttpClient();
 
             // override ReferenceResolver is supplied
-            Func<IEvent, string> serializer;
             if (this.batchConfig.ReferenceResolver == null)
             {
-                serializer = ev => JsonConvert.SerializeObject(new ExperimentalUnitFragment { Key = ev.Key, Value = ev });
+                this.eventSerializer = ev => JsonConvert.SerializeObject(new ExperimentalUnitFragment { Key = ev.Key, Value = ev });
             }
             else
             {
-                serializer = ev => JsonConvert.SerializeObject(
+                this.eventSerializer = ev => JsonConvert.SerializeObject(
                     new ExperimentalUnitFragment { Key = ev.Key, Value = ev },
                     Formatting.None,
                     new JsonSerializerSettings { ReferenceResolver = this.batchConfig.ReferenceResolver });
             }
-
-            this.eventSource = new TransformBlock<IEvent, string>(
-                serializer,
-                new ExecutionDataflowBlockOptions
-                {
-                    MaxDegreeOfParallelism = this.batchConfig.MaxDegreeOfSerializationParallelism,
-                    BoundedCapacity = this.batchConfig.MaxUploadQueueCapacity
-                });
-            this.eventObserver = this.eventSource.AsObserver();
-
-            this.eventProcessor = new ActionBlock<IList<string>>((Func<IList<string>, Task>)this.BatchProcess, new ExecutionDataflowBlockOptions
-            {
-                // TODO: Finetune these numbers
-                MaxDegreeOfParallelism = Environment.ProcessorCount * 4,
-                BoundedCapacity = this.batchConfig.MaxUploadQueueCapacity,
-            });
-
-            this.eventUnsubscriber = this.eventSource.AsObservable()
-                .Window(this.batchConfig.MaxDuration)
-                .Select(w => w.Buffer(this.batchConfig.MaxEventCount, this.batchConfig.MaxBufferSizeInBytes, json => Encoding.UTF8.GetByteCount(json)))
-                .SelectMany(buffer => buffer)
-                .Subscribe(this.eventProcessor.AsObserver());
-
-            this.random = new Random(0);
         }
 
         /// <summary>
@@ -104,61 +93,6 @@ namespace Microsoft.Research.DecisionService.Uploader
         }
 
         /// <summary>
-        /// Sends a single event to the buffer for upload.
-        /// </summary>
-        /// <param name="e">The event to be uploaded.</param>
-        public void Upload(IEvent e) 
-        {
-            if (!this.DropEventRandomlyIfNeeded(e))
-            {
-                this.eventObserver.OnNext(e);
-            }
-        }
-
-        /// <summary>
-        /// Sends a single event to the buffer for upload in a non-blocking fashion 
-        /// where event is dropped if the buffer queue is full.
-        /// </summary>
-        /// <param name="e">The event to be uploaded.</param>
-        /// <returns>true if the event was accepted into the buffer queue for processing.</returns>
-        public bool TryUpload(IEvent e)
-        {
-            if (!this.DropEventRandomlyIfNeeded(e))
-            {
-                return this.eventSource.Post(e);
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Sends multiple events to the buffer for upload.
-        /// </summary>
-        /// <param name="events">The list of events to be uploaded</param>
-        public void Upload(List<IEvent> events)
-        {
-            foreach (IEvent e in events)
-            {
-                this.eventObserver.OnNext(e);
-            }
-        }
-
-        /// <summary>
-        /// Sends multiple events to the buffer for upload in a non-blocking fashion
-        /// where events are dropped if the buffer queue is full.
-        /// </summary>
-        /// <param name="events">The list of events to be uploaded</param>
-        /// <returns>true if all events were accepted into the buffer queue for processing.</returns>
-        public bool TryUpload(List<IEvent> events)
-        {
-            bool accepted = true;
-            foreach (IEvent e in events)
-            {
-                accepted &= this.eventSource.Post(e);
-            }
-            return accepted;
-        }
-
-        /// <summary>
         /// Initialize the HTTP client with proper authentication scheme.
         /// </summary>
         /// <param name="authenticationScheme">The authentication scheme.</param>
@@ -169,16 +103,36 @@ namespace Microsoft.Research.DecisionService.Uploader
         }
 
         /// <summary>
+        /// Transforms an event to a string suitable for uploading.
+        /// </summary>
+        /// <param name="sourceEvent">The source event to be transformed.</param>
+        /// <returns>The transformed string to be uploaded.</returns>
+        public override string TransformEvent(IEvent sourceEvent)
+        {
+            return this.eventSerializer(sourceEvent);
+        }
+
+        /// <summary>
+        /// Measures the size of the transformed event in bytes.
+        /// </summary>
+        /// <param name="transformedEvent">The transformed event.</param>
+        /// <returns>The size in bytes of the transformed event.</returns>
+        public override int MeasureTransformedEvent(string transformedEvent)
+        {
+            return Encoding.UTF8.GetByteCount(transformedEvent);
+        }
+
+        /// <summary>
         /// Triggered when a batch of events is ready for upload.
         /// </summary>
-        /// <param name="jsonExpFragments">The list of JSON-serialized event strings.</param>
+        /// <param name="transformedEvents">The list of JSON-serialized event strings.</param>
         /// <returns>Task</returns>
-        private async Task BatchProcess(IList<string> jsonExpFragments)
+        public override async Task UploadTransformedEvents(IList<string> transformedEvents)
         {
             EventBatch batch = new EventBatch
             {
                 Id = Guid.NewGuid(),
-                JsonEvents = jsonExpFragments
+                JsonEvents = transformedEvents
             };
 
             string json = EventUploader.BuildJsonMessage(batch, this.experimentalUnitDuration);
@@ -236,24 +190,9 @@ namespace Microsoft.Research.DecisionService.Uploader
         }
 
         /// <summary>
-        /// Flush the data buffer to upload all remaining events.
+        /// Disposes all internal members.
         /// </summary>
-        public void Flush()
-        {
-            this.eventSource.Complete();
-            this.eventProcessor.Completion.Wait();
-        }
-
-        /// <summary>
-        /// Disposes the current object and all internal members.
-        /// </summary>
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -262,39 +201,8 @@ namespace Microsoft.Research.DecisionService.Uploader
                     this.httpClient.Dispose();
                     this.httpClient = null;
                 }
-
-                if (this.eventUnsubscriber != null)
-                {
-                    this.eventUnsubscriber.Dispose();
-                    this.eventUnsubscriber = null;
-                }
             }
-        }
-
-        /// <summary>
-        /// Drop an interaction event if the input buffer queue is at certain capacity specified in the batch configuration. 
-        /// In such cases, with probability Q, the event is dropped. Otherwise, it's modified so that its observed 
-        /// probability P is set to P * (1 - Q). If the queue is below capacity, the event is left unchanged.
-        /// </summary>
-        /// <param name="interaction">The interaction event.</param>
-        /// <returns>true if the event is dropped.</returns>
-        private bool DropEventRandomlyIfNeeded(IEvent e)
-        {
-            Interaction interaction = e as Interaction;
-            if (interaction != null &&
-                this.eventSource.InputCount >= this.batchConfig.MaxUploadQueueCapacity * this.batchConfig.DroppingPolicy.MaxQueueLevelBeforeDrop)
-            {
-                if (this.random.NextDouble() <= this.batchConfig.DroppingPolicy.ProbabilityOfDrop)
-                {
-                    return true;
-                }
-                else
-                {
-                    // if not dropped, modify probability by multiplying with 1 - P(drop)
-                    interaction.Probability *= (1 - this.batchConfig.DroppingPolicy.ProbabilityOfDrop);
-                }
-            }
-            return false;
+            base.Dispose(disposing);
         }
 
         private static string BuildJsonMessage(EventBatch batch, int? experimentalUnitDuration)
@@ -347,27 +255,5 @@ namespace Microsoft.Research.DecisionService.Uploader
                 }
             }
         }
-
-        /// <summary>
-        /// Occurs when a package was successfully uploaded to the join server.
-        /// </summary>
-        public event PackageSentEventHandler PackageSent;
-
-        /// <summary>
-        /// Occurs when a package was not successfully uploaded to the join server.
-        /// </summary>
-        public event PackageSendFailedEventHandler PackageSendFailed;
-
-        private readonly BatchingConfiguration batchConfig;
-        private readonly string loggingServiceBaseAddress;
-        private int? experimentalUnitDuration;
-        private readonly Random random;
-
-        private readonly TransformBlock<IEvent, string> eventSource;
-        private readonly IObserver<IEvent> eventObserver;
-        private readonly ActionBlock<IList<string>> eventProcessor;
-        private IDisposable eventUnsubscriber;
-
-        private IHttpClient httpClient;
     }
 }

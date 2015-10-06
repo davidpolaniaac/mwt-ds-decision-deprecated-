@@ -169,6 +169,7 @@
     <Compile Include="DecisionService.cs" />
     <Compile Include="DecisionServiceConfiguration.cs" />
     <Compile Include="DecisionServiceConstants.cs" />
+    <Compile Include="JoinServerType.cs" />
     <Compile Include="JoinServiceLogger.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="ModelTransferData.cs" />

@@ -82,8 +82,14 @@ namespace Microsoft.Research.DecisionService.Uploader
         ExponentialRetry
     }
 
+    /// <summary>
+    /// Represents settings which control how data can be dropped at high load.
+    /// </summary>
     public class DroppingPolicy
     {
+        /// <summary>
+        /// Constructor using default settings to not drop any data.
+        /// </summary>
         public DroppingPolicy()
         {
             // By default don't drop anything

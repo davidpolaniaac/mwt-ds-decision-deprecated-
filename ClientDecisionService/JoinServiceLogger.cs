@@ -6,12 +6,23 @@ namespace ClientDecisionService
 {
     internal class JoinServiceLogger<TContext> : ILogger<TContext>, IDisposable
     {
-        public JoinServiceLogger(BatchingConfiguration batchConfig, 
+        public void InitializeWithCustomAzureJoinServer(
             string authorizationToken,
-            string loggingServiceBaseAddress)
+            string loggingServiceBaseAddress,
+            BatchingConfiguration batchConfig)
         {
-            this.eventUploader = new EventUploader(batchConfig, loggingServiceBaseAddress);
-            this.eventUploader.InitializeWithToken(authorizationToken);
+            var eventUploader = new EventUploader(batchConfig, loggingServiceBaseAddress);
+            eventUploader.InitializeWithToken(authorizationToken);
+            
+            this.eventUploader = eventUploader;
+        }
+
+        public void InitializeWithAzureStreamAnalyticsJoinServer(
+            string azureStreamAnalyticsConnectionString,
+            string eventHubInputName,
+            BatchingConfiguration batchConfig)
+        {
+            this.eventUploader = new EventUploaderASA(azureStreamAnalyticsConnectionString, eventHubInputName, batchConfig);
         }
 
         public void Record(TContext context, uint[] actions, float probability, string uniqueKey)
@@ -67,7 +78,7 @@ namespace ClientDecisionService
         }
 
         #region Members
-        private EventUploader eventUploader;
+        private IEventUploader eventUploader;
         #endregion
     }
 }
