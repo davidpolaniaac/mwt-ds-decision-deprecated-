@@ -24,24 +24,30 @@ namespace ClientDecisionService
 
             if (!config.OfflineMode)
             {
-                var joinServerLogger = new JoinServiceLogger<TContext>();
-                switch (config.JoinServerType)
+                if (config.Recorder == null)
                 {
-                    case JoinServerType.CustomAzureSolution:
-                        joinServerLogger.InitializeWithCustomAzureJoinServer(
-                            config.AuthorizationToken, 
-                            config.LoggingServiceAddress, 
-                            config.JoinServiceBatchConfiguration);
-                        break;
-                    case JoinServerType.AzureStreamAnalytics:
-                        joinServerLogger.InitializeWithAzureStreamAnalyticsJoinServer(
-                            config.EventHubConnectionString, 
-                            config.EventHubInputName, 
-                            config.JoinServiceBatchConfiguration);
-                        break;
+                    var joinServerLogger = new JoinServiceLogger<TContext>();
+                    switch (config.JoinServerType)
+                    {
+                        case JoinServerType.CustomAzureSolution:
+                            joinServerLogger.InitializeWithCustomAzureJoinServer(
+                                config.AuthorizationToken,
+                                config.LoggingServiceAddress,
+                                config.JoinServiceBatchConfiguration);
+                            break;
+                        case JoinServerType.AzureStreamAnalytics:
+                            joinServerLogger.InitializeWithAzureStreamAnalyticsJoinServer(
+                                config.EventHubConnectionString,
+                                config.EventHubInputName,
+                                config.JoinServiceBatchConfiguration);
+                            break;
+                    }
+                    this.recorder = joinServerLogger;
                 }
-
-                this.recorder = config.Recorder ?? joinServerLogger;
+                else
+                {
+                    this.recorder = config.Recorder;
+                }
 
                 this.settingsBlobPollDelay = config.PollingForSettingsPeriod == TimeSpan.Zero ? DecisionServiceConstants.PollDelay : config.PollingForSettingsPeriod;
                 this.modelBlobPollDelay = config.PollingForModelPeriod == TimeSpan.Zero ? DecisionServiceConstants.PollDelay : config.PollingForModelPeriod;
