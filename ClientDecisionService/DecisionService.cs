@@ -35,7 +35,7 @@ namespace ClientDecisionService
                         break;
                     case JoinServerType.AzureStreamAnalytics:
                         joinServerLogger.InitializeWithAzureStreamAnalyticsJoinServer(
-                            config.AzureStreamAnalyticsConnectionString, 
+                            config.EventHubConnectionString, 
                             config.EventHubInputName, 
                             config.JoinServiceBatchConfiguration);
                         break;

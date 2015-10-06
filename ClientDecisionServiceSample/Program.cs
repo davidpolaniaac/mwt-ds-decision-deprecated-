@@ -187,7 +187,7 @@ namespace ClientDecisionServiceSample
                 PollingForModelPeriod = TimeSpan.MinValue,
                 PollingForSettingsPeriod = TimeSpan.MinValue,
                 JoinServerType = ClientDecisionService.JoinServerType.AzureStreamAnalytics,
-                AzureStreamAnalyticsConnectionString = "Endpoint=sb://mwtbus.servicebus.windows.net/;SharedAccessKeyName=MWTASA;SharedAccessKey=Gt6SZtMJvESLQM74pfZyaYwYbn7X5YHBqi1QntpooNc=",
+                EventHubConnectionString = "Endpoint=sb://mwtbus.servicebus.windows.net/;SharedAccessKeyName=MWTASA;SharedAccessKey=Gt6SZtMJvESLQM74pfZyaYwYbn7X5YHBqi1QntpooNc=",
                 EventHubInputName = "Impressions"
             };
 

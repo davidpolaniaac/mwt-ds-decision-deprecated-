@@ -18,11 +18,11 @@ namespace ClientDecisionService
         }
 
         public void InitializeWithAzureStreamAnalyticsJoinServer(
-            string azureStreamAnalyticsConnectionString,
+            string eventHubConnectionString,
             string eventHubInputName,
             BatchingConfiguration batchConfig)
         {
-            this.eventUploader = new EventUploaderASA(azureStreamAnalyticsConnectionString, eventHubInputName, batchConfig);
+            this.eventUploader = new EventUploaderASA(eventHubConnectionString, eventHubInputName, batchConfig);
         }
 
         public void Record(TContext context, uint[] actions, float probability, string uniqueKey)

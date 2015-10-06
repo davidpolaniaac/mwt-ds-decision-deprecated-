@@ -118,7 +118,7 @@ namespace ClientDecisionService
         /// <summary>
         /// The ASA connection string to use if ASA-based Join Server is selected.
         /// </summary>
-        public string AzureStreamAnalyticsConnectionString { get; set; }
+        public string EventHubConnectionString { get; set; }
 
         /// <summary>
         /// The EventHub input name to use if ASA-based Join Server is selected.

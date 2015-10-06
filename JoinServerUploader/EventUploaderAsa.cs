@@ -30,18 +30,18 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// <summary>
         /// Constructs an uploader object.
         /// </summary>
-        /// <param name="azureStreamAnalyticsConnectionString">The Azure Stream Analytics connection string.</param>
+        /// <param name="eventHubConnectionString">The Azure Stream Analytics connection string.</param>
         /// <param name="eventHubInputName">The EventHub input name where data are sent to.</param>
         /// <param name="batchConfig">Optional; The batching configuration to used when uploading data.</param>
         public EventUploaderASA
         (
-            string azureStreamAnalyticsConnectionString, 
+            string eventHubConnectionString, 
             string eventHubInputName, 
             BatchingConfiguration batchConfig = null
         ) 
         : base(batchConfig)
         {
-            this.connectionString = azureStreamAnalyticsConnectionString;
+            this.connectionString = eventHubConnectionString;
             this.eventHubInputName = eventHubInputName;
             
             var builder = new ServiceBusConnectionStringBuilder(this.connectionString)
