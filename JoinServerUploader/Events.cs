@@ -53,7 +53,7 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// The unique time stamp of this event.
         /// </summary>
         [JsonIgnore]
-        DateTimeOffset TimeStamp { get; set; }
+        DateTime TimeStamp { get; set; }
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// <summary>
         /// Gets or sets the time stamp of the event.
         /// </summary>
-        public DateTimeOffset TimeStamp { get; set; }
+        public DateTime TimeStamp { get; set; }
 
         /// <summary>
         /// Gets or sets the probability of choosing the action (before it was chosen).
@@ -160,7 +160,7 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// <summary>
         /// Gets or sets the time stamp of the event.
         /// </summary>
-        public DateTimeOffset TimeStamp { get; set; }
+        public DateTime TimeStamp { get; set; }
 
         /// <summary>
         /// Gets or sets the value of the observation.

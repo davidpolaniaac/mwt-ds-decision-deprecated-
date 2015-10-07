@@ -22,6 +22,6 @@ namespace MultiWorldTesting
         /// uniquely identify an event. Events with same key
         /// must have the same time stamp.
         /// </summary>
-        public DateTimeOffset TimeStamp { get; set; }
+        public DateTime TimeStamp { get; set; }
     }
 }
