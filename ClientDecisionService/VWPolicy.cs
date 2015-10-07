@@ -48,7 +48,7 @@ namespace ClientDecisionService
         {
             if (vwPool == null)
             {
-                // TODO: return null or empty array, check with Stephen
+                throw new InvalidOperationException("A VW model must be supplied before the call to ChooseAction.");
             }
             using (var vw = vwPool.GetOrCreate())
             {
