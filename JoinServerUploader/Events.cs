@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -47,6 +48,12 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// </summary>
         [JsonIgnore]
         string Key { get; set; }
+
+        /// <summary>
+        /// The unique time stamp of this event.
+        /// </summary>
+        [JsonIgnore]
+        DateTimeOffset TimeStamp { get; set; }
     }
 
     /// <summary>
@@ -64,6 +71,11 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// Gets or sets the unique experimental unit key that this event belongs to.
         /// </summary>
         public string Key { get; set; }
+
+        /// <summary>
+        /// Gets or sets the time stamp of the event.
+        /// </summary>
+        public DateTimeOffset TimeStamp { get; set; }
 
         /// <summary>
         /// Gets or sets the probability of choosing the action (before it was chosen).
@@ -144,6 +156,11 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// Gets or sets the unique experimental unit key that this event belongs to.
         /// </summary>
         public string Key { get; set; }
+
+        /// <summary>
+        /// Gets or sets the time stamp of the event.
+        /// </summary>
+        public DateTimeOffset TimeStamp { get; set; }
 
         /// <summary>
         /// Gets or sets the value of the observation.

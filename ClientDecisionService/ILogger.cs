@@ -9,8 +9,8 @@ namespace ClientDecisionService
 {
     public interface ILogger<TContext> : IRecorder<TContext>
     {
-        void ReportReward(float reward, string uniqueKey);
-        void ReportOutcome(object outcome, string uniqueKey);
+        void ReportReward(UniqueEventID uniqueKey, float reward);
+        void ReportOutcome(UniqueEventID uniqueKey, object outcome);
         void Flush();
     }
 }

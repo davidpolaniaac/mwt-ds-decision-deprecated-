@@ -93,7 +93,7 @@ namespace ClientDecisionService
             ILogger<TContext> logger = this.recorder as ILogger<TContext>;
             if (logger != null)
             {
-                logger.ReportReward(reward, uniqueKey.Key);
+                logger.ReportReward(uniqueKey, reward);
             }
         }
 
@@ -110,7 +110,7 @@ namespace ClientDecisionService
             ILogger<TContext> logger = this.recorder as ILogger<TContext>;
             if (logger != null)
             {
-                logger.ReportOutcome(outcome, uniqueKey.Key);
+                logger.ReportOutcome(uniqueKey, outcome);
             }
         }
 

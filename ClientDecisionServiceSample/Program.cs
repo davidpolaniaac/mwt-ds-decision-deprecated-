@@ -180,7 +180,7 @@ namespace ClientDecisionServiceSample
         {
             // Create configuration for the decision service
             var serviceConfig = new DecisionServiceConfiguration<ADFContext>(
-                authorizationToken: "10198550-a074-4f9c-8b15-cc389bc2bbbe",
+                authorizationToken: "sample-code",
                 explorer: new EpsilonGreedyExplorer<ADFContext>(new ADFPolicy(), epsilon: 0.8f),
                 getNumberOfActionsFunc: GetNumberOfActionsFromAdfContext)
             {
@@ -193,17 +193,19 @@ namespace ClientDecisionServiceSample
 
             var service = new DecisionService<ADFContext>(serviceConfig);
 
-            string uniqueKey = "asa-client";
+            string uniqueKey = "sample-asa-client";
 
             var rg = new Random(uniqueKey.GetHashCode());
 
             var vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext);
 
-            for (int i = 1; i < 100; i++)
+            for (int i = 1; i < 20; i++)
             {
                 int numActions = rg.Next(5, 10);
-                uint[] action = service.ChooseAction(new UniqueEventID { Key = uniqueKey }, ADFContext.CreateRandom(numActions, rg));
-                service.ReportReward(i / 100f, new UniqueEventID { Key = uniqueKey });
+
+                DateTimeOffset timeStamp = DateTimeOffset.Now;
+                uint[] action = service.ChooseAction(new UniqueEventID { Key = uniqueKey, TimeStamp = timeStamp }, ADFContext.CreateRandom(numActions, rg));
+                service.ReportReward(i / 100f, new UniqueEventID { Key = uniqueKey, TimeStamp = timeStamp });
             }
 
             service.Flush();

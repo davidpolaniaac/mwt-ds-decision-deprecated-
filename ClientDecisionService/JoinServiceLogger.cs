@@ -31,26 +31,29 @@ namespace ClientDecisionService
             this.eventUploader.TryUpload(new MultiActionInteraction
             { 
                 Key = uniqueKey.Key,
+                TimeStamp = uniqueKey.TimeStamp,
                 Actions = actions,
                 Probability = probability,
                 Context = context
             });
         }
 
-        public void ReportReward(float reward, string uniqueKey)
+        public void ReportReward(UniqueEventID uniqueKey, float reward)
         {
             this.eventUploader.TryUpload(new Observation
             {
-                Key = uniqueKey,
+                Key = uniqueKey.Key,
+                TimeStamp = uniqueKey.TimeStamp,
                 Value = new { Reward = reward }
             });
         }
 
-        public void ReportOutcome(object outcome, string uniqueKey)
+        public void ReportOutcome(UniqueEventID uniqueKey, object outcome)
         {
             this.eventUploader.TryUpload(new Observation
             {
-                Key = uniqueKey,
+                Key = uniqueKey.Key,
+                TimeStamp = uniqueKey.TimeStamp,
                 Value = outcome
             });
         }

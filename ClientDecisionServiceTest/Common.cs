@@ -130,12 +130,12 @@ namespace ClientDecisionServiceTest
             this.numOutcome = 0;
         }
 
-        public void ReportReward(float reward, string uniqueKey)
+        public void ReportReward(UniqueEventID uniqueKey, float reward)
         {
             this.numReward++;
         }
 
-        public void ReportOutcome(object outcome, string uniqueKey)
+        public void ReportOutcome(UniqueEventID uniqueKey, object outcome)
         {
             this.numOutcome++;
         }
