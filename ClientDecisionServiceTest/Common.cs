@@ -147,7 +147,7 @@ namespace ClientDecisionServiceTest
             this.numOutcome = 0;
         }
 
-        public void Record(TestContext context, uint[] actions, float probability, string uniqueKey)
+        public void Record(TestContext context, uint[] actions, float probability, UniqueEventID uniqueKey)
         {
             this.numRecord++;
         }

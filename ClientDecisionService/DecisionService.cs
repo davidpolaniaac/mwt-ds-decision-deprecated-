@@ -88,12 +88,12 @@ namespace ClientDecisionService
         /// </summary>
         /// <param name="reward">The simple float reward.</param>
         /// <param name="uniqueKey">The unique key of the experimental unit.</param>
-        public void ReportReward(float reward, string uniqueKey)
+        public void ReportReward(float reward, UniqueEventID uniqueKey)
         {
             ILogger<TContext> logger = this.recorder as ILogger<TContext>;
             if (logger != null)
             {
-                logger.ReportReward(reward, uniqueKey);
+                logger.ReportReward(reward, uniqueKey.Key);
             }
         }
 
@@ -105,12 +105,12 @@ namespace ClientDecisionService
         /// <remarks>
         /// Outcomes are general forms of observations that can be converted to simple float rewards as required by some ML algorithms for optimization.
         /// </remarks>
-        public void ReportOutcome(object outcome, string uniqueKey)
+        public void ReportOutcome(object outcome, UniqueEventID uniqueKey)
         {
             ILogger<TContext> logger = this.recorder as ILogger<TContext>;
             if (logger != null)
             {
-                logger.ReportOutcome(outcome, uniqueKey);
+                logger.ReportOutcome(outcome, uniqueKey.Key);
             }
         }
 
@@ -123,7 +123,7 @@ namespace ClientDecisionService
         /// <remarks>
         /// This method will send logging data to the <see cref="IRecorder{TContext}"/> object specified at initialization.
         /// </remarks>
-        public uint[] ChooseAction(string uniqueKey, TContext context)
+        public uint[] ChooseAction(UniqueEventID uniqueKey, TContext context)
         {
             return mwt.ChooseAction(explorer, uniqueKey, context);
         }

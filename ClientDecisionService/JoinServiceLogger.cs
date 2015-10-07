@@ -1,4 +1,5 @@
 ﻿using Microsoft.Research.DecisionService.Uploader;
+using MultiWorldTesting;
 using Newtonsoft.Json;
 using System;
 
@@ -25,11 +26,11 @@ namespace ClientDecisionService
             this.eventUploader = new EventUploaderASA(eventHubConnectionString, eventHubInputName, batchConfig);
         }
 
-        public void Record(TContext context, uint[] actions, float probability, string uniqueKey)
+        public void Record(TContext context, uint[] actions, float probability, UniqueEventID uniqueKey)
         {
             this.eventUploader.TryUpload(new MultiActionInteraction
             { 
-                Key = uniqueKey,
+                Key = uniqueKey.Key,
                 Actions = actions,
                 Probability = probability,
                 Context = context

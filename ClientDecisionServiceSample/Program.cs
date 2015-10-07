@@ -202,8 +202,8 @@ namespace ClientDecisionServiceSample
             for (int i = 1; i < 100; i++)
             {
                 int numActions = rg.Next(5, 10);
-                uint[] action = service.ChooseAction(uniqueKey, ADFContext.CreateRandom(numActions, rg));
-                service.ReportReward(i / 100f, uniqueKey);
+                uint[] action = service.ChooseAction(new UniqueEventID { Key = uniqueKey }, ADFContext.CreateRandom(numActions, rg));
+                service.ReportReward(i / 100f, new UniqueEventID { Key = uniqueKey });
             }
 
             service.Flush();
@@ -313,8 +313,8 @@ namespace ClientDecisionServiceSample
                 }
 
                 int numActions = rg.Next(5, 10);
-                uint[] action = service.ChooseAction(uniqueKey, ADFContext.CreateRandom(numActions, rg));
-                service.ReportReward(i / 100f, uniqueKey);
+                uint[] action = service.ChooseAction(new UniqueEventID { Key = uniqueKey }, ADFContext.CreateRandom(numActions, rg));
+                service.ReportReward(i / 100f, new UniqueEventID { Key = uniqueKey });
             }
 
             service.Flush();
@@ -449,8 +449,8 @@ namespace ClientDecisionServiceSample
 
             var actionBlock = new ActionBlock<Parsed>(p =>
             {
-                uint[] action = service.ChooseAction(p.UniqueId.ToString(), p.Context);
-                service.ReportReward(-Math.Abs((int)action[0] - p.TrueAction), p.UniqueId.ToString());
+                uint[] action = service.ChooseAction(new UniqueEventID { Key = p.UniqueId.ToString() }, p.Context);
+                service.ReportReward(-Math.Abs((int)action[0] - p.TrueAction), new UniqueEventID { Key = p.UniqueId.ToString() });
             });
 
             transformBlock.LinkTo(actionBlock, new DataflowLinkOptions { PropagateCompletion = true });
@@ -566,7 +566,7 @@ namespace ClientDecisionServiceSample
 
     class MyAzureRecorder : IRecorder<UserContext>
     {
-        public void Record(UserContext context, UInt32[] action, float probability, string uniqueKey)
+        public void Record(UserContext context, UInt32[] action, float probability, UniqueEventID uniqueKey)
         {
             // Stores the tuple in Azure.
         }

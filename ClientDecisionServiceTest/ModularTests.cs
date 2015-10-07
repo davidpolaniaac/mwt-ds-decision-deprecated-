@@ -51,7 +51,7 @@ namespace ClientDecisionServiceTest
             var ds = new DecisionService<TestContext>(dsConfig); 
             for (int i = 0; i < numChooseAction; i++)
             {
-                ds.ChooseAction(i.ToString(), new TestContext());
+                ds.ChooseAction(new UniqueEventID { Key = i.ToString() }, new TestContext());
             }
 
             Assert.AreEqual(numChooseAction, ((TestLogger)dsConfig.Recorder).NumRecord);
@@ -59,7 +59,7 @@ namespace ClientDecisionServiceTest
             int numReward = 200;
             for (int i = 0; i < numReward; i++)
             {
-                ds.ReportReward(i, i.ToString());
+                ds.ReportReward(i, new UniqueEventID { Key = i.ToString() });
             }
 
             Assert.AreEqual(numReward, ((TestLogger)dsConfig.Recorder).NumReward);
@@ -67,7 +67,7 @@ namespace ClientDecisionServiceTest
             int numOutcome = 300;
             for (int i = 0; i < numOutcome; i++)
             {
-                ds.ReportOutcome(i.ToString(), i.ToString());
+                ds.ReportOutcome(i.ToString(), new UniqueEventID { Key = i.ToString() });
             }
 
             Assert.AreEqual(numOutcome, ((TestLogger)dsConfig.Recorder).NumOutcome);
@@ -93,7 +93,7 @@ namespace ClientDecisionServiceTest
             var ds = new DecisionService<TestContext>(dsConfig);
             for (int i = 0; i < numChooseAction; i++)
             {
-                ds.ChooseAction(i.ToString(), new TestContext());
+                ds.ChooseAction(new UniqueEventID { Key = i.ToString() }, new TestContext());
             }
 
             Assert.AreEqual(numChooseAction, ((TestLogger)dsConfig.Recorder).NumRecord);
@@ -101,7 +101,7 @@ namespace ClientDecisionServiceTest
             int numReward = 200;
             for (int i = 0; i < numReward; i++)
             {
-                ds.ReportReward(i, i.ToString());
+                ds.ReportReward(i, new UniqueEventID { Key = i.ToString() });
             }
 
             Assert.AreEqual(numReward, ((TestLogger)dsConfig.Recorder).NumReward);
@@ -109,7 +109,7 @@ namespace ClientDecisionServiceTest
             int numOutcome = 300;
             for (int i = 0; i < numOutcome; i++)
             {
-                ds.ReportOutcome(i.ToString(), i.ToString());
+                ds.ReportOutcome(i.ToString(), new UniqueEventID { Key = i.ToString() });
             }
 
             Assert.AreEqual(numOutcome, ((TestLogger)dsConfig.Recorder).NumOutcome);

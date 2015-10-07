@@ -32,7 +32,7 @@ namespace ClientDecisionServiceTest
 
             var ds = new DecisionService<TestContext>(dsConfig);
 
-            uint[] chosenActions = ds.ChooseAction(uniqueKey, new TestContext());
+            uint[] chosenActions = ds.ChooseAction(new UniqueEventID { Key = uniqueKey }, new TestContext());
 
             ds.Flush();
 
@@ -59,10 +59,10 @@ namespace ClientDecisionServiceTest
 
             var ds = new DecisionService<TestContext>(dsConfig);
 
-            uint[] chosenAction1 = ds.ChooseAction(uniqueKey, new TestContext());
-            uint[] chosenAction2 = ds.ChooseAction(uniqueKey, new TestContext());
-            ds.ReportReward(1.0f, uniqueKey);
-            ds.ReportOutcome(new { value = "test outcome" }, uniqueKey);
+            uint[] chosenAction1 = ds.ChooseAction(new UniqueEventID { Key = uniqueKey }, new TestContext());
+            uint[] chosenAction2 = ds.ChooseAction(new UniqueEventID { Key = uniqueKey }, new TestContext());
+            ds.ReportReward(1.0f, new UniqueEventID { Key = uniqueKey });
+            ds.ReportOutcome(new { value = "test outcome" }, new UniqueEventID { Key = uniqueKey });
 
             ds.Flush();
 
@@ -101,7 +101,7 @@ namespace ClientDecisionServiceTest
             var ds = new DecisionService<TestContext>(dsConfig);
             for (int i = 0; i < numEvents; i++)
             {
-                uint[] chosenAction1 = ds.ChooseAction(uniqueKey, new TestContext());
+                uint[] chosenAction1 = ds.ChooseAction(new UniqueEventID { Key = uniqueKey }, new TestContext());
             }
             ds.Flush();
 
@@ -152,8 +152,8 @@ namespace ClientDecisionServiceTest
 
             Parallel.For(0, numEvents, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount * 2 }, (i) =>
             {
-                chosenActions.Add(ds.ChooseAction(uniqueKey, new TestContext()));
-                ds.ReportOutcome(new { value = createObservation(i) }, uniqueKey);
+                chosenActions.Add(ds.ChooseAction(new UniqueEventID { Key = uniqueKey }, new TestContext()));
+                ds.ReportOutcome(new { value = createObservation(i) }, new UniqueEventID { Key = uniqueKey });
             });
 
             ds.Flush();
