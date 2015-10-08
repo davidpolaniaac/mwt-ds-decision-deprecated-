@@ -95,7 +95,10 @@ namespace ClientDecisionService
             {
                 this.vwPool = new VowpalWabbitThreadedPrediction<TContext, TActionDependentFeature>(vwModel);
             }
-
+            else
+            {
+                this.vwPool.UpdateModel(vwModel);
+            }
             return true;
         }
 
