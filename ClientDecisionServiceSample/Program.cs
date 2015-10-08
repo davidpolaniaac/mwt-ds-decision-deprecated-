@@ -4,6 +4,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using MultiWorldTesting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,7 +26,17 @@ namespace ClientDecisionServiceSample
     {
         static void Main(string[] args)
         {
-            Trace.Listeners.Add(new ConsoleTraceListener());
+            //var jsonBuilder = new StringBuilder();
+            //jsonBuilder.Append("{\"EventId\":\"" + "test" + "\",");
+            //jsonBuilder.Append("\"TimeStamp\":\"" + DateTime.UtcNow.ToString("o") + "\",");
+            //jsonBuilder.Append("\"j\":[");
+            //jsonBuilder.Append(JsonConvert.SerializeObject(new int[] { -11, -22 }));
+            //jsonBuilder.Append("]}");
+
+
+            //var obj = JsonConvert.DeserializeObject(jsonBuilder.ToString());
+
+            //Trace.Listeners.Add(new ConsoleTraceListener());
 
             try
             {
@@ -203,9 +214,13 @@ namespace ClientDecisionServiceSample
             {
                 int numActions = rg.Next(5, 10);
 
-                DateTimeOffset timeStamp = DateTimeOffset.Now;
-                uint[] action = service.ChooseAction(new UniqueEventID { Key = uniqueKey, TimeStamp = timeStamp }, ADFContext.CreateRandom(numActions, rg));
-                service.ReportReward(i / 100f, new UniqueEventID { Key = uniqueKey, TimeStamp = timeStamp });
+                DateTime timeStamp = DateTime.UtcNow;
+                string key = "sample-asa-client" + Guid.NewGuid().ToString();
+
+                uint[] action = service.ChooseAction(new UniqueEventID { Key = key, TimeStamp = timeStamp }, ADFContext.CreateRandom(numActions, rg));
+                service.ReportReward(i / 100f, new UniqueEventID { Key = key, TimeStamp = timeStamp });
+
+                System.Threading.Thread.Sleep(1);
             }
 
             service.Flush();
