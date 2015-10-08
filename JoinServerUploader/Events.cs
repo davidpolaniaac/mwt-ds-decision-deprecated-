@@ -50,6 +50,15 @@ namespace Microsoft.Research.DecisionService.Uploader
         string Key { get; set; }
 
         /// <summary>
+        /// Workaround for ASA query: An ID field which is different for
+        /// events under same Key in order to use OrderBy. Otherwise
+        /// if the field in OrderBy is constant across events, ASA will
+        /// default to comparing records which does not work.
+        /// </summary>
+        [JsonProperty(PropertyName = "id")]
+        int Id { get; set; }
+
+        /// <summary>
         /// The unique time stamp of this event.
         /// </summary>
         [JsonIgnore]
@@ -71,6 +80,14 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// Gets or sets the unique experimental unit key that this event belongs to.
         /// </summary>
         public string Key { get; set; }
+
+        /// <summary>
+        /// Workaround for ASA query: An ID field which is different for
+        /// events under same Key in order to use OrderBy. Otherwise
+        /// if the field in OrderBy is constant across events, ASA will
+        /// default to comparing records which does not work.
+        /// </summary>
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets the time stamp of the event.
@@ -156,6 +173,14 @@ namespace Microsoft.Research.DecisionService.Uploader
         /// Gets or sets the unique experimental unit key that this event belongs to.
         /// </summary>
         public string Key { get; set; }
+
+        /// <summary>
+        /// Workaround for ASA query: An ID field which is different for
+        /// events under same Key in order to use OrderBy. Otherwise
+        /// if the field in OrderBy is constant across events, ASA will
+        /// default to comparing records which does not work.
+        /// </summary>
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets the time stamp of the event.

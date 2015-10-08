@@ -26,17 +26,7 @@ namespace ClientDecisionServiceSample
     {
         static void Main(string[] args)
         {
-            //var jsonBuilder = new StringBuilder();
-            //jsonBuilder.Append("{\"EventId\":\"" + "test" + "\",");
-            //jsonBuilder.Append("\"TimeStamp\":\"" + DateTime.UtcNow.ToString("o") + "\",");
-            //jsonBuilder.Append("\"j\":[");
-            //jsonBuilder.Append(JsonConvert.SerializeObject(new int[] { -11, -22 }));
-            //jsonBuilder.Append("]}");
-
-
-            //var obj = JsonConvert.DeserializeObject(jsonBuilder.ToString());
-
-            //Trace.Listeners.Add(new ConsoleTraceListener());
+            Trace.Listeners.Add(new ConsoleTraceListener());
 
             try
             {
@@ -217,8 +207,8 @@ namespace ClientDecisionServiceSample
                 DateTime timeStamp = DateTime.UtcNow;
                 string key = "sample-asa-client" + Guid.NewGuid().ToString();
 
-                uint[] action = service.ChooseAction(new UniqueEventID { Key = key, TimeStamp = timeStamp }, ADFContext.CreateRandom(numActions, rg));
-                service.ReportReward(i / 100f, new UniqueEventID { Key = key, TimeStamp = timeStamp });
+                uint[] action = service.ChooseAction(new UniqueEventID { Key = key, Id = 1, TimeStamp = timeStamp }, ADFContext.CreateRandom(numActions, rg));
+                service.ReportReward(i / 100f, new UniqueEventID { Key = key, Id = 0, TimeStamp = timeStamp });
 
                 System.Threading.Thread.Sleep(1);
             }

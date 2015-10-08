@@ -31,6 +31,7 @@ namespace ClientDecisionService
             this.eventUploader.TryUpload(new MultiActionInteraction
             { 
                 Key = uniqueKey.Key,
+                Id = uniqueKey.Id,
                 TimeStamp = uniqueKey.TimeStamp,
                 Actions = actions,
                 Probability = probability,
@@ -43,6 +44,7 @@ namespace ClientDecisionService
             this.eventUploader.TryUpload(new Observation
             {
                 Key = uniqueKey.Key,
+                Id = uniqueKey.Id,
                 TimeStamp = uniqueKey.TimeStamp,
                 Value = new { Reward = reward }
             });
@@ -53,6 +55,7 @@ namespace ClientDecisionService
             this.eventUploader.TryUpload(new Observation
             {
                 Key = uniqueKey.Key,
+                Id = uniqueKey.Id,
                 TimeStamp = uniqueKey.TimeStamp,
                 Value = outcome
             });

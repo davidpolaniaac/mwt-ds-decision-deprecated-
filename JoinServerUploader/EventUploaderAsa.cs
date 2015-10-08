@@ -120,6 +120,7 @@ namespace Microsoft.Research.DecisionService.Uploader
         {
             var jsonBuilder = new StringBuilder();
             jsonBuilder.Append("{\"EventId\":\"" + e.Key + "\",");
+            jsonBuilder.Append("\"Id\":" + e.Id + ",");
             jsonBuilder.Append("\"TimeStamp\":\"" + e.TimeStamp.ToString("o") + "\",");
             jsonBuilder.Append("\"j\":[");
             jsonBuilder.Append(JsonConvert.SerializeObject(e));
