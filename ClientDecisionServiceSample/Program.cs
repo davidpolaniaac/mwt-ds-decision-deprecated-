@@ -191,6 +191,11 @@ namespace ClientDecisionServiceSample
             return context.ActionDependentFeatures;
         }
 
+        private static void SetModelId(ADFContext context, string id)
+        {
+            context.ModelId = id;
+        }
+
         private static void SampleCodeUsingActionDependentFeatures()
         {
             // Create configuration for the decision service
@@ -213,19 +218,28 @@ namespace ClientDecisionServiceSample
 
             var rg = new Random(uniqueKey.GetHashCode());
 
-            var vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext);
+            var vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, SetModelId);
 
             for (int i = 1; i < 100; i++)
             {
                 if (i == 30)
                 {
+                    try
+                    {
+                        TrainNewVWModelWithRandomData(numExamples: 5, numActions: 10);
+                    }
+                    catch (Exception ex)
+                    {
+                        int x = 0;
+                        x++;
+                    }
                     string vwModelFile = TrainNewVWModelWithRandomData(numExamples: 5, numActions: 10);
 
-                    vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, vwModelFile);
+                    vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, SetModelId, vwModelFile);
 
                     // Alternatively, VWPolicy can also be loaded from an IO stream:
                     // var vwModelStream = new MemoryStream(File.ReadAllBytes(vwModelFile));
-                    // vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(vwModelStream);
+                    // vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, SetModelId, vwModelStream);
 
                     // Manually updates decision service with a new policy for consuming VW models.
                     service.UpdatePolicy(vwPolicy);
@@ -443,6 +457,8 @@ namespace ClientDecisionServiceSample
         public string[] Shared { get; set; }
 
         public IReadOnlyList<ADFFeatures> ActionDependentFeatures { get; set; }
+
+        public string ModelId { get; set; }
 
         public static ADFContext CreateRandom(int numActions, Random rg)
         {

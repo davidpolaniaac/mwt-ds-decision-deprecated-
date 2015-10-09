@@ -19,10 +19,16 @@ namespace ClientDecisionService
         /// <summary>
         /// Constructor using an optional model file.
         /// </summary>
+        /// <param name="getContextFeaturesFunc">Callback to get features from the Context.</param>
+        /// <param name="setModelIdCallback">Callback to set model id in the Context for reproducibility.</param>
         /// <param name="vwModelFile">Optional; the VowpalWabbit model file to load from.</param>
-        public VWPolicy(Func<TContext, IReadOnlyCollection<TActionDependentFeature>> getContextFeaturesFunc, string vwModelFile = null)
+        public VWPolicy(
+            Func<TContext, IReadOnlyCollection<TActionDependentFeature>> getContextFeaturesFunc,
+            Action<TContext, string> setModelIdCallback,
+            string vwModelFile = null)
         {
             this.getContextFeaturesFunc = getContextFeaturesFunc;
+            this.setModelIdCallback = setModelIdCallback;
             if (vwModelFile != null)
             {
                 this.ModelUpdate(vwModelFile);
@@ -32,10 +38,16 @@ namespace ClientDecisionService
         /// <summary>
         /// Constructor using a memory stream.
         /// </summary>
+        /// <param name="getContextFeaturesFunc">Callback to get features from the Context.</param>
+        /// <param name="setModelIdCallback">Callback to set model id in the Context for reproducibility.</param>
         /// <param name="vwModelStream">The VW model memory stream.</param>
-        public VWPolicy(Func<TContext, IReadOnlyCollection<TActionDependentFeature>> getContextFeaturesFunc, Stream vwModelStream)
+        public VWPolicy(
+            Func<TContext, IReadOnlyCollection<TActionDependentFeature>> getContextFeaturesFunc,
+            Action<TContext, string> setModelIdCallback,
+            Stream vwModelStream)
         {
             this.getContextFeaturesFunc = getContextFeaturesFunc;
+            this.setModelIdCallback = setModelIdCallback;
             this.ModelUpdate(vwModelStream);
         }
 
@@ -56,6 +68,9 @@ namespace ClientDecisionService
 
                 // return indices
                 Tuple<int, TActionDependentFeature>[] vwMultilabelPredictions = vw.Value.Predict(context, features);
+
+                // Callback to store model Id in the Context
+                this.setModelIdCallback(context, vw.Value.Native.ID);
 
                 // VW multi-label predictions are 0-based
                 return vwMultilabelPredictions.Select(p => (uint)(p.Item1 + 1)).ToArray();
@@ -129,5 +144,6 @@ namespace ClientDecisionService
 
         private VowpalWabbitThreadedPrediction<TContext, TActionDependentFeature> vwPool;
         private Func<TContext, IReadOnlyCollection<TActionDependentFeature>> getContextFeaturesFunc;
+        private Action<TContext, string> setModelIdCallback;
     }
 }
