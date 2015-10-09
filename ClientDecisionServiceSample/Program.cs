@@ -224,15 +224,6 @@ namespace ClientDecisionServiceSample
             {
                 if (i == 30)
                 {
-                    try
-                    {
-                        TrainNewVWModelWithRandomData(numExamples: 5, numActions: 10);
-                    }
-                    catch (Exception ex)
-                    {
-                        int x = 0;
-                        x++;
-                    }
                     string vwModelFile = TrainNewVWModelWithRandomData(numExamples: 5, numActions: 10);
 
                     vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, SetModelId, vwModelFile);
