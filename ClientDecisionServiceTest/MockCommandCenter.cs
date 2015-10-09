@@ -127,6 +127,7 @@ namespace ClientDecisionServiceTest
                         context.ActionDependentFeatures.First(f => f.Label != null).Label);
                 }
 
+                vw.Native.ID = "random_id";
                 vw.Native.SaveModel(vwFileName);
             }
 

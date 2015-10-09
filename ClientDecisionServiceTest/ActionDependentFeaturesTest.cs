@@ -195,8 +195,8 @@ namespace ClientDecisionServiceTest
         }
 
         private static void SetModelId(TestADFContextWithFeatures context, string id)
-        { 
-            // Do nothing
+        {
+            Assert.AreEqual("random_id", id);
         }
 
         private MockJoinServer joinServer;
