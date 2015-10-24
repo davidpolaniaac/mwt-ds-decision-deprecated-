@@ -92,16 +92,16 @@
     </Reference>
     <Reference Include="System.Web" />
     <Reference Include="VowpalWabbit, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a76afd1645210483, processorArchitecture=AMD64">
-      <HintPath>..\packages\VowpalWabbit.8.0.0.26\lib\net45\VowpalWabbit.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\VowpalWabbit.8.0.0.28\lib\net45\VowpalWabbit.dll</HintPath>
     </Reference>
     <Reference Include="VowpalWabbit.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a76afd1645210483, processorArchitecture=AMD64">
-      <HintPath>..\packages\VowpalWabbit.8.0.0.26\lib\net45\VowpalWabbit.Common.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\VowpalWabbit.8.0.0.28\lib\net45\VowpalWabbit.Common.dll</HintPath>
     </Reference>
     <Reference Include="VowpalWabbitCore, Version=0.0.0.0, Culture=neutral, PublicKeyToken=a76afd1645210483, processorArchitecture=AMD64">
-      <HintPath>..\packages\VowpalWabbit.8.0.0.26\lib\net45\VowpalWabbitCore.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\VowpalWabbit.8.0.0.28\lib\net45\VowpalWabbitCore.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Choose>

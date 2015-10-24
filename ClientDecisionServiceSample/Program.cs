@@ -48,6 +48,19 @@ namespace ClientDecisionServiceSample
             uploader.Flush();
         }
 
+        private static void TestUpdateModel()
+        {
+            var vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, SetModelId);
+
+            while (true)
+            {
+                Random r = new Random();
+                string vwModelFile = TrainNewVWModelWithRandomData(numExamples: r.Next(4, 8), numActions: r.Next(8, 16));
+                vwPolicy.ModelUpdate(vwModelFile);
+                Console.WriteLine(".");
+            }
+        }
+
         private static void TestAzure()
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=decisionservice;AccountKey=hAv42cl/DlFLwd+N23/wNQKub/nVSEYyO6zjlksgMFC9/HVhQMHpNVhdaZGTD1PT0W7lqfKbf9LVt2/z2K3Quw==");
