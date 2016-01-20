@@ -49,6 +49,19 @@ namespace ClientDecisionServiceSample
             uploader.Flush();
         }
 
+        private static void TestUpdateModel()
+        {
+            var vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, SetModelId);
+
+            while (true)
+            {
+                Random r = new Random();
+                string vwModelFile = TrainNewVWModelWithRandomData(numExamples: r.Next(4, 8), numActions: r.Next(8, 16));
+                vwPolicy.ModelUpdate(vwModelFile);
+                Console.WriteLine(".");
+            }
+        }
+
         private static void TestAzure()
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=decisionservice;AccountKey=hAv42cl/DlFLwd+N23/wNQKub/nVSEYyO6zjlksgMFC9/HVhQMHpNVhdaZGTD1PT0W7lqfKbf9LVt2/z2K3Quw==");
@@ -272,6 +285,11 @@ namespace ClientDecisionServiceSample
             return context.ActionDependentFeatures;
         }
 
+        private static void SetModelId(ADFContext context, string id)
+        {
+            context.ModelId = id;
+        }
+
         private static void SampleCodeUsingActionDependentFeatures()
         {
             // Create configuration for the decision service
@@ -294,7 +312,7 @@ namespace ClientDecisionServiceSample
 
             var rg = new Random(uniqueKey.GetHashCode());
 
-            var vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext);
+            var vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, SetModelId);
 
             for (int i = 1; i < 100; i++)
             {
@@ -302,11 +320,11 @@ namespace ClientDecisionServiceSample
                 {
                     string vwModelFile = TrainNewVWModelWithRandomData(numExamples: 5, numActions: 10);
 
-                    vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, vwModelFile);
+                    vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, SetModelId, vwModelFile);
 
                     // Alternatively, VWPolicy can also be loaded from an IO stream:
                     // var vwModelStream = new MemoryStream(File.ReadAllBytes(vwModelFile));
-                    // vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(vwModelStream);
+                    // vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, SetModelId, vwModelStream);
 
                     // Manually updates decision service with a new policy for consuming VW models.
                     service.UpdatePolicy(vwPolicy);
@@ -524,6 +542,8 @@ namespace ClientDecisionServiceSample
         public string[] Shared { get; set; }
 
         public IReadOnlyList<ADFFeatures> ActionDependentFeatures { get; set; }
+
+        public string ModelId { get; set; }
 
         public static ADFContext CreateRandom(int numActions, Random rg)
         {

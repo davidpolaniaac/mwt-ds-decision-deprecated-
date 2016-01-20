@@ -84,7 +84,7 @@ namespace ClientDecisionServiceTest
                     byte[] modelContent = commandCenter.GetModelBlobContent(numExamples: 3 + modelIndex, numFeatureVectors: 4 + modelIndex);
                     System.IO.File.WriteAllBytes(currentModelFile, modelContent);
 
-                    ds.UpdatePolicy(new VWPolicy<TestADFContextWithFeatures, TestADFFeatures>(GetFeaturesFromContext, currentModelFile));
+                    ds.UpdatePolicy(new VWPolicy<TestADFContextWithFeatures, TestADFFeatures>(GetFeaturesFromContext, SetModelId, currentModelFile));
 
                     actualModelFiles.Add(currentModelFile);
                 }
@@ -149,7 +149,7 @@ namespace ClientDecisionServiceTest
 
                     var modelStream = new MemoryStream(modelContent);
 
-                    ds.UpdatePolicy(new VWPolicy<TestADFContextWithFeatures, TestADFFeatures>(GetFeaturesFromContext, modelStream));
+                    ds.UpdatePolicy(new VWPolicy<TestADFContextWithFeatures, TestADFFeatures>(GetFeaturesFromContext, SetModelId, modelStream));
                 }
 
                 int numActions = rg.Next(5, 20);
@@ -192,6 +192,11 @@ namespace ClientDecisionServiceTest
         private static IReadOnlyCollection<TestADFFeatures> GetFeaturesFromContext(TestADFContextWithFeatures context)
         {
             return context.ActionDependentFeatures;
+        }
+
+        private static void SetModelId(TestADFContextWithFeatures context, string id)
+        {
+            Assert.AreEqual("random_id", id);
         }
 
         private MockJoinServer joinServer;
