@@ -211,7 +211,7 @@ namespace ClientDecisionServiceSample
 
             var rg = new Random(uniqueKey.GetHashCode());
 
-            var vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext);
+            var vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, setModelIdCallback: (context, modelId) => { });
 
             for (int i = 1; i < 20; i++)
             {
