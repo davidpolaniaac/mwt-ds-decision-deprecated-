@@ -193,10 +193,10 @@ namespace ClientDecisionServiceSample
         private static void SampleCodeUsingDecisionServiceWithASAJoinServer()
         {
             // Create configuration for the decision service
-            var serviceConfig = new DecisionServiceConfiguration<ADFContext>(
+            var serviceConfig = new DecisionServiceConfiguration<ExpandedContext>(
                 authorizationToken: "sample-code",
-                explorer: new EpsilonGreedyExplorer<ADFContext>(new ADFPolicy(), epsilon: 0.8f),
-                getNumberOfActionsFunc: GetNumberOfActionsFromAdfContext)
+                explorer: new EpsilonGreedyExplorer<ExpandedContext>(new ExpandedPolicy(), epsilon: 0.8f),
+                getNumberOfActionsFunc: ExpandedContext.GetNumberOfActionsFromAdfContext)
             {
                 PollingForModelPeriod = TimeSpan.MinValue,
                 PollingForSettingsPeriod = TimeSpan.MinValue,
@@ -205,13 +205,13 @@ namespace ClientDecisionServiceSample
                 EventHubInputName = "Impressions"
             };
 
-            var service = new DecisionService<ADFContext>(serviceConfig);
+            var service = new DecisionService<ExpandedContext>(serviceConfig);
 
             string uniqueKey = "sample-asa-client";
 
             var rg = new Random(uniqueKey.GetHashCode());
 
-            var vwPolicy = new VWPolicy<ADFContext, ADFFeatures>(GetFeaturesFromContext, setModelIdCallback: (context, modelId) => { });
+            var vwPolicy = new VWPolicy<ExpandedContext, ExpandedActionDependentFeatures>(ExpandedContext.GetFeaturesFromContext, setModelIdCallback: (context, modelId) => { });
 
             for (int i = 1; i < 20; i++)
             {
@@ -220,7 +220,7 @@ namespace ClientDecisionServiceSample
                 DateTime timeStamp = DateTime.UtcNow;
                 string key = "sample-asa-client" + Guid.NewGuid().ToString();
 
-                uint[] action = service.ChooseAction(new UniqueEventID { Key = key, Id = 1, TimeStamp = timeStamp }, ADFContext.CreateRandom(numActions, rg));
+                uint[] action = service.ChooseAction(new UniqueEventID { Key = key, Id = 1, TimeStamp = timeStamp }, ExpandedContext.CreateRandom(numActions, rg));
                 service.ReportReward(i / 100f, new UniqueEventID { Key = key, Id = 0, TimeStamp = timeStamp });
 
                 System.Threading.Thread.Sleep(1);
@@ -511,149 +511,6 @@ namespace ClientDecisionServiceSample
             service.Flush();
 
             Console.WriteLine("Service flushed done: " + stopwatch.Elapsed);
-        }
-    }
-
-    class Parsed
-    {
-        internal string UniqueId { get; set; }
-
-        internal UserContext Context { get; set; }
-
-        internal int TrueAction { get; set; }
-    }
-
-    class UserContext
-    {
-
-        public UserContext() : this(null) { }
-
-        public UserContext(IDictionary<string, float> features)
-        {
-            FeatureVector = features;
-        }
-
-        public IDictionary<string, float> FeatureVector { get; set; }
-    }
-
-    public class ADFContext
-    {
-        [Feature]
-        public string[] Shared { get; set; }
-
-        public IReadOnlyList<ADFFeatures> ActionDependentFeatures { get; set; }
-
-        public string ModelId { get; set; }
-
-        public static ADFContext CreateRandom(int numActions, Random rg)
-        {
-            int iCB = rg.Next(0, numActions);
-
-            var fv = new ADFFeatures[numActions];
-            for (int i = 0; i < numActions; i++)
-            {
-                fv[i] = new ADFFeatures
-                {
-                    Features = new[] { "a_" + (i + 1), "b_" + (i + 1), "c_" + (i + 1) }
-                };
-
-                if (i == iCB) // Randomly place a Contextual Bandit label
-                {
-                    fv[i].Label = new ContextualBanditLabel
-                    {
-                        Cost = (float)rg.NextDouble(),
-                        Probability = (float)rg.NextDouble()
-                    };
-                }
-            }
-
-            var context = new ADFContext
-            {
-                Shared = new string[] { "shared", "features" },
-                ActionDependentFeatures = fv
-            };
-            return context;
-        }
-    }
-
-    public class ADFFeatures
-    {
-        [Feature]
-        public string[] Features { get; set; }
-
-        public override string ToString()
-        {
-            return string.Join(" ", this.Features);
-        }
-
-        public ILabel Label { get; set; }
-    }
-
-    class MyOutcome { }
-
-    class MyAzureRecorder : IRecorder<UserContext>
-    {
-        public void Record(UserContext context, UInt32[] action, float probability, UniqueEventID uniqueKey)
-        {
-            // Stores the tuple in Azure.
-        }
-    }
-
-    class UserPolicy : IPolicy<UserContext>
-    {
-        public UserPolicy(int numActions)
-        {
-            this.numActions = numActions;
-        }
-
-        public uint[] ChooseAction(UserContext context)
-        {
-            return Enumerable.Range(1, numActions).Select(a => (uint)a).ToArray(); //((context.FeatureVector.Length % 2) + 1);
-        }
-
-        int numActions;
-    }
-
-    class ADFPolicy : IPolicy<ADFContext>
-    {
-        public uint[] ChooseAction(ADFContext context)
-        {
-            return Enumerable.Range(1, context.ActionDependentFeatures.Count).Select(a => (uint)a).ToArray();
-        }
-    }
-
-    class UserScorer : IScorer<UserContext>
-    {
-        public List<float> ScoreActions(UserContext context)
-        {
-            return new List<float>();
-        }
-    }
-
-    public class AzureMLBESInputType
-    {
-        public InputType Input { get; set; }
-        public string Output { get; set; }
-        public GlobalParametersType GlobalParameters { get; set; }
-
-        public class InputType
-        {
-            public string ConnectionString { get; set; }
-            public string RelativeLocation { get; set; }
-            public string BaseLocation { get; set; }
-            public string SasBlobToken { get; set; }
-        }
-
-        public class GlobalParametersType
-        {
-            [JsonProperty(PropertyName = "Authorization Token")]
-            public string ReaderToken { get; set; }
-
-            [JsonProperty(PropertyName = "Decision Service Authorization Token")]
-            public string Token { get; set; }
-
-            [JsonProperty(PropertyName = "Number of actions")]
-            public int NumberOfActions { get; set; }
         }
     }
 }

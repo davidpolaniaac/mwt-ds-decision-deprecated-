@@ -67,13 +67,13 @@ namespace ClientDecisionService
                 IReadOnlyCollection<TActionDependentFeature> features = this.getContextFeaturesFunc(context);
 
                 // return indices
-                Tuple<int, TActionDependentFeature>[] vwMultilabelPredictions = vw.Value.Predict(context, features);
+                ActionDependentFeature<TActionDependentFeature>[] vwMultilabelPredictions = vw.Value.Predict(context, features);
 
                 // Callback to store model Id in the Context
                 this.setModelIdCallback(context, vw.Value.Native.ID);
 
                 // VW multi-label predictions are 0-based
-                return vwMultilabelPredictions.Select(p => (uint)(p.Item1 + 1)).ToArray();
+                return vwMultilabelPredictions.Select(p => (uint)(p.Index + 1)).ToArray();
             }
         }
 
