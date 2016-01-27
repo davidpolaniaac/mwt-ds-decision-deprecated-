@@ -122,9 +122,9 @@ namespace Microsoft.Research.DecisionService.Uploader
             jsonBuilder.Append("{\"EventId\":\"" + e.Key + "\",");
             jsonBuilder.Append("\"Id\":" + e.Id + ",");
             jsonBuilder.Append("\"TimeStamp\":\"" + e.TimeStamp.ToString("o") + "\",");
-            jsonBuilder.Append("\"j\":[");
+            jsonBuilder.Append("\"j\":");
             jsonBuilder.Append(JsonConvert.SerializeObject(e));
-            jsonBuilder.Append("]}");
+            jsonBuilder.Append("}");
             return jsonBuilder.ToString();
         }
 
