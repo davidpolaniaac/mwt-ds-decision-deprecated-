@@ -203,11 +203,14 @@ namespace ClientDecisionServiceSample
                 JoinServerType = ClientDecisionService.JoinServerType.AzureStreamAnalytics,
                 EventHubConnectionString = "Endpoint=sb://mwtbus.servicebus.windows.net/;SharedAccessKeyName=MWTASA;SharedAccessKey=Gt6SZtMJvESLQM74pfZyaYwYbn7X5YHBqi1QntpooNc=",
                 EventHubInputName = "Impressions"
+                //EventHubConnectionString = "Endpoint=sb://mwtbus.servicebus.windows.net/;SharedAccessKeyName=shared-policy-scratch;SharedAccessKey=MqKvUJ/ZqBYC28izl0hgzdSmt9b3JvA2uUdncV4lRJA=",
+                //EventHubInputName = "eh-scratch"
             };
 
             var service = new DecisionService<ExpandedContext>(serviceConfig);
 
-            string uniqueKey = "sample-asa-client";
+            string uniqueKey = "sample-asa-client-";
+            //string uniqueKey = "scratch-key-";
 
             var rg = new Random(uniqueKey.GetHashCode());
 
@@ -218,7 +221,7 @@ namespace ClientDecisionServiceSample
                 int numActions = rg.Next(5, 10);
 
                 DateTime timeStamp = DateTime.UtcNow;
-                string key = "sample-asa-client" + Guid.NewGuid().ToString();
+                string key = uniqueKey + Guid.NewGuid().ToString();
 
                 uint[] action = service.ChooseAction(new UniqueEventID { Key = key, Id = 1, TimeStamp = timeStamp }, ExpandedContext.CreateRandom(numActions, rg));
                 service.ReportReward(i / 100f, new UniqueEventID { Key = key, Id = 0, TimeStamp = timeStamp });
